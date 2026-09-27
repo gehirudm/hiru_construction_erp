@@ -7,6 +7,8 @@ DEFAULT_CATEGORIES = (
 
 
 def after_install():
+    from hiru_construction.quick_expense_fields import execute
+    execute()
     for label in DEFAULT_CATEGORIES:
         if not frappe.db.exists("Construction Cost Category", {"category_name": label, "scope": "Global"}):
             frappe.get_doc({"doctype": "Construction Cost Category", "category_name": label,

@@ -6,8 +6,8 @@
   "standard": 1,
   "icon": "project",
   "icon_type": "Link",
-  "link_type": "Workspace Sidebar",
-  "link_to": "Hiru Construction",
+  "link_type": "External",
+  "link": "/construction",
   "hidden": 0,
   "roles": []
 }

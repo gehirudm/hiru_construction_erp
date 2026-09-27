@@ -17,4 +17,5 @@ RUN python -c 'import json; from pathlib import Path; [(lambda p, original: p.wr
 COPY --chown=frappe:frappe pyproject.toml apps/hiru_construction/pyproject.toml
 COPY --chown=frappe:frappe hiru_construction apps/hiru_construction/hiru_construction
 RUN env/bin/pip install --no-cache-dir -e apps/hiru_construction
+RUN ln -s /home/frappe/frappe-bench/apps/hiru_construction/hiru_construction/public assets/hiru_construction
 COPY --chown=frappe:frappe scripts/provision.sh /opt/hiru/scripts/provision.sh

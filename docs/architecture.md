@@ -1,5 +1,7 @@
 # Application architecture
 
+The daily interface uses Frappe website routes in `hiru_construction/www/`, versioned assets in `public/`, and permission-checked methods in `daily.py`. Guided expenses create standard Purchase Invoices; custom fields store a unique retry identifier, request hash and category. No separate expense ledger is introduced. The optional test frontend serves only the isolated test site for `make test-ui`.
+
 `hiru_construction` is a normal, installable Frappe application, alongside unmodified `frappe`, `erpnext`, and `hrms` apps. The repository is the app source root, not a bench directory or an ERPNext fork.
 
 | Path | Responsibility |

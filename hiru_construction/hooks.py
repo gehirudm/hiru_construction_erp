@@ -6,3 +6,4 @@ app_email = ""
 app_license = "Proprietary"
 required_apps = ["erpnext", "hrms"]
 after_install = "hiru_construction.setup.after_install"
+get_website_user_home_page = "hiru_construction.daily.home_page"

@@ -32,6 +32,10 @@ async function main() {
       console.error('Login message:', await page.locator('.login-error-banner').allTextContents());
       throw error;
     }
+    await page.goto(base + '/construction?project=PILOT-PROJECT-001');
+    await page.waitForFunction(() => document.querySelector('#spent').textContent.includes('132,000'));
+    fs.mkdirSync('.local/screenshots', { recursive: true });
+    await page.screenshot({ path: '.local/screenshots/daily-demo.png', fullPage: true });
     await page.goto(base + '/desk/hiru-construction');
     await page.getByText('Construction Cost Category', { exact: true }).first().waitFor();
     fs.mkdirSync('.local/screenshots', { recursive: true });

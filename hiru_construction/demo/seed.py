@@ -271,7 +271,7 @@ def setup_fuel(company):
 
 def setup_workspace():
     if frappe.get_meta("User").has_field("default_workspace"):
-        frappe.db.set_value("User", "Administrator", "default_workspace", "Hiru Construction")
+        frappe.db.set_value("User", "Administrator", "default_workspace", None)
 
 
 def main():

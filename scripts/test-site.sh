@@ -22,6 +22,10 @@ bench --site "$site" set-config mute_emails 1
 bench --site "$site" disable-scheduler
 bench --site "$site" migrate
 bench --site "$site" execute hiru_construction.tests.setup.prepare
+if [[ "${1:-}" == browser ]]; then
+  bench --site "$site" execute hiru_construction.tests.daily_browser.prepare
+  exit 0
+fi
 bench --site "$site" set-config allow_tests true
 trap 'bench --site "$site" set-config allow_tests false' EXIT
 bench --site "$site" run-tests --app hiru_construction

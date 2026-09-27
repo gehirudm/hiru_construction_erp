@@ -2,3 +2,5 @@
 
 [post_model_sync]
 hiru_construction.setup
+hiru_construction.quick_expense_fields
+hiru_construction.daily_home

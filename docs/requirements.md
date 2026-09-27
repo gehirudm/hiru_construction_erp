@@ -77,9 +77,10 @@ This is a capability map, not a final implementation choice. We will test standa
 2. **ERPNext pilot and application foundation — complete:** Install the custom Frappe app alongside ERPNext/HRMS, preserve development data, provide simple lifecycle commands, and validate a synthetic project with expenses, budgets, tasks, payroll, stock and a vehicle log. The first category-management forms are also available; category/account mapping and cost dashboards remain subsequent work.
 3. **Tender and cost plan — complete:** Submitted tender protection, controlled revisions, account/category validation and cancellation recovery.
 4. **Current project cost view — complete:** Category chart and report comparing submitted tender/current budget with actual expense postings and uninvoiced orders. Unmapped costs remain visible; possible receipt/accrual overlaps require reconciliation. See [calculation boundaries](cost-reporting.md).
-5. **Forecasts and trends:** Add separately maintained estimates of further uncommitted work, historical comparisons and receipt reconciliation automation.
-6. **People and fleet:** Configure payroll/advances and fuel capture with project allocation and useful reports.
-7. **Planning:** Add capacity-aware scheduling and reviewed natural-language work-item entry.
+5. **Simplified daily work — complete:** Project overview and guided direct expense entry with private receipts, draft review and standard accounting postings. Payroll, attendance and fleet still need their simplified workflows. See the [daily work guide](daily-work.md).
+6. **Forecasts and trends:** Add separately maintained estimates of further uncommitted work, historical comparisons and receipt reconciliation automation.
+7. **People and fleet:** Configure payroll/advances and fuel capture with project allocation and useful reports.
+8. **Planning:** Add capacity-aware scheduling and reviewed natural-language work-item entry.
 
 Each completed milestone gets a separate local, Git-ignored numbered devlog and a Git commit for the corresponding repository changes. Future milestone scope and order may change after the pilot.
 

@@ -115,6 +115,27 @@ services:
       start_period: 20s
     restart: unless-stopped
 
+  test-frontend:
+    <<: *app
+    command: [nginx-entrypoint.sh]
+    environment:
+      BACKEND: backend:8000
+      FRAPPE_SITE_NAME_HEADER: hiru-test.localhost
+      SOCKETIO: websocket:9000
+      UPSTREAM_REAL_IP_ADDRESS: 127.0.0.1
+      UPSTREAM_REAL_IP_HEADER: X-Forwarded-For
+      UPSTREAM_REAL_IP_RECURSIVE: "off"
+      PROXY_READ_TIMEOUT: "120"
+      CLIENT_MAX_BODY_SIZE: 50m
+    ports:
+      - "127.0.0.1:${HIRU_TEST_PORT:-8081}:8080"
+    profiles: [test]
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/api/method/ping', timeout=5)"]
+      interval: 5s
+      timeout: 10s
+      retries: 12
+
 volumes:
   sites:
   logs:

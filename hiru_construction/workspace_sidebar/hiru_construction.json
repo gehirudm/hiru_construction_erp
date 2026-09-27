@@ -9,10 +9,16 @@
   "items": [
     {
       "type": "Link",
-      "label": "Home",
-      "link_type": "Workspace",
-      "link_to": "Hiru Construction",
+      "label": "Daily work",
+      "link_type": "URL",
+      "url": "/construction",
       "icon": "home"
+    },
+    {
+      "type": "Link",
+      "label": "Advanced overview",
+      "link_type": "Workspace",
+      "link_to": "Hiru Construction"
     },
     {
       "type": "Link",

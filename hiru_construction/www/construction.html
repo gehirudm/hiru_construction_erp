@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token | e }}">
+  <title>Daily work · Hiru Construction</title>
+  <link rel="stylesheet" href="/assets/hiru_construction/css/daily.css?v={{ asset_version }}">
+  <script defer src="/assets/hiru_construction/js/daily.js?v={{ asset_version }}"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to daily work</a>
+  <header class="topbar">
+    <a class="brand" href="/construction"><span class="brand-mark">H</span><span>Hiru Construction<small>Daily work</small></span></a>
+    <nav aria-label="Account"><span class="user-name">{{ display_name | e }}</span><a class="quiet-link" href="/desk/hiru-construction">Advanced workspace ↗</a><button class="text-button" id="logout">Sign out</button></nav>
+  </header>
+  <main id="main" class="shell">
+    <section class="intro"><div><p class="eyebrow">YOUR SITE, AT A GLANCE</p><h1>Let’s get to work.</h1><p class="muted">Choose a project to see its costs and record today’s expenses.</p></div><div class="date-chip" id="today"></div></section>
+    <div id="notice" class="notice" role="status" hidden></div>
+    <div id="page-error" class="alert error" role="alert" hidden></div>
+    <div class="project-bar"><label for="project">Project<select id="project" disabled><option>Loading projects…</option></select></label><button class="secondary" id="refresh" disabled>Refresh</button><button class="primary" id="new-expense" disabled>＋ Record expense</button></div>
+    <div id="loading" class="empty" role="status">Loading your projects…</div>
+    <div id="content" hidden>
+      <div class="project-heading"><h2 id="project-title"></h2><span class="pill">Project overview</span></div>
+      <div id="budget-warning" class="alert" hidden></div>
+      <section class="metrics" aria-label="Project costs">
+        <article><p>Agreed budget</p><strong id="budget">—</strong><small>Current approved amount</small></article>
+        <article><p>Recorded expenses</p><strong id="spent">—</strong><small>Posted costs for this project</small></article>
+        <article><p>Orders still to be billed</p><strong id="orders">—</strong><small>Committed purchases, before taxes</small></article>
+        <article class="remaining"><p>Budget left</p><strong id="remaining">—</strong><small>After expenses and open orders</small></article>
+      </section>
+      <p class="cost-note">Whole-project totals include future-dated posted costs. Budget left is not a forecast; further work and contingency are separate.</p>
+      <div class="dashboard-grid">
+        <section class="panel"><div class="panel-heading"><div><h2>Where the money goes</h2><p class="muted">Expenses and open orders against each category’s budget.</p></div></div><div id="categories"></div><a id="cost-detail" class="inline-link">Detailed cost report ↗</a></section>
+        <section class="panel"><div class="panel-heading"><div><h2>Work on site</h2><p id="task-count" class="muted"></p></div></div><div id="tasks"></div></section>
+      </div>
+      <section class="panel expenses-panel"><div class="panel-heading"><div><h2>Recent daily expenses</h2><p class="muted">Drafts are waiting for review and are not included in recorded costs.</p></div></div><div id="recent"></div></section>
+    </div>
+    <footer>Hiru Construction · Daily work <span>Project setup, payroll and other workflows are in the advanced workspace for now.</span></footer>
+  </main>
+  <dialog id="expense-dialog" aria-labelledby="expense-title">
+    <div class="dialog-heading"><div><p class="eyebrow">EXPENSE ENTRY</p><h2 id="expense-title">Record an expense</h2></div><button class="icon-button" id="close-expense" aria-label="Close expense">✕</button></div>
+    <div id="expense-error" class="alert error" role="alert" hidden></div>
+    <form id="expense-form">
+      <p class="muted">For a direct project expense. Stock purchases, purchase orders, payroll and tax breakdowns need <a href="/desk/purchase-invoice/new-purchase-invoice" target="_blank" rel="noopener">advanced entry</a>.</p>
+      <div class="form-grid">
+        <label class="full">Category<select id="category" required></select></label>
+        <label class="full">What was it for?<input id="description" maxlength="500" required placeholder="e.g. Sand delivery to site"></label>
+        <div class="full"><label for="supplier-search">Find supplier<input id="supplier-search" type="search" placeholder="Search supplier names" autocomplete="off"></label><div class="supplier-row"><label for="supplier">Supplier<select id="supplier" required></select></label><button type="button" class="secondary" id="add-supplier">Add supplier</button></div></div>
+        <label><span id="amount-label">Total amount</span><input id="amount" type="number" min="0.01" max="99999999999.99" step="0.01" inputmode="decimal" required></label>
+        <label>Date<input id="expense-date" type="date" required></label>
+        <label class="full">Payment status<select id="payment"><option value="unpaid">Not paid yet</option><option value="paid">Already paid from business cash or bank</option></select><small>Records what happened; no money is transferred.</small></label>
+        <label class="full" id="paid-from-label" hidden>Paid from<select id="paid-from"></select></label>
+        <label class="full">Bill or receipt number <span class="optional">(optional)</span><input id="bill-no" maxlength="140" autocomplete="off"></label>
+        <label class="full">Receipt <span class="optional">(optional)</span><input id="receipt" type="file" accept="image/*,application/pdf"><small>Image or PDF, up to 10 MB. Stored privately with this expense.</small></label>
+      </div>
+      <div class="dialog-actions"><button type="button" class="secondary" id="cancel-entry">Cancel</button><button type="submit" class="primary" id="save-draft">Save draft & review</button></div>
+    </form>
+    <section id="review" hidden>
+      <p id="review-status" class="alert"></p><dl id="review-details"></dl><div id="receipt-links"></div>
+      <div id="receipt-retry" hidden><p class="alert">The draft is saved, but the receipt did not upload. Retry it before recording the expense.</p><button class="secondary" id="retry-upload">Retry receipt upload</button></div>
+      <div class="dialog-actions"><button class="secondary" id="finish-review">Keep as draft</button><button class="primary" id="post-expense">Confirm & record expense</button></div>
+    </section>
+  </dialog>
+  <dialog id="supplier-dialog" aria-labelledby="supplier-title"><form id="supplier-form"><h2 id="supplier-title">Add a supplier</h2><p class="muted">Use the name shown on the bill or receipt.</p><label>Supplier name<input id="supplier-name" maxlength="140" required></label><p id="supplier-error" class="alert error" role="alert" hidden></p><div class="dialog-actions"><button class="secondary" type="button" id="cancel-supplier">Cancel</button><button class="primary" type="submit" id="save-supplier">Add supplier</button></div></form></dialog>
+</body>
+</html>
