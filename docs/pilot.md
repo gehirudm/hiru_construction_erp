@@ -46,7 +46,7 @@ The verification script reads submitted documents, stock balances, and the Gener
 ## Boundaries of this milestone
 
 - The **Hiru Construction** workspace and **Construction Cost Category** form are installed from versioned app files. Nine default global categories can be reused; additional categories can be global or restricted to a project. System Managers and Projects Managers can maintain categories; Projects Users can read them. This is the first category-management slice, not the final owner/supervisor role model.
-- Standard project budgets operate on ledger accounts. Category-to-account mapping, preserved tender versions, forecast calculations and dashboards remain the next cost-management work. The new category master does not yet recategorize transactions.
+- **Construction Cost Plan** is now available for tender and approved-revision lines. Each plan belongs to a project and records original estimate, approved revision, contingency, category and optional expense account. A project has one tender baseline; approved revisions supersede older approved revisions. This plan is an input to future dashboards and does not yet recategorize transactions.
 - Gantt tasks have dates and dependencies. Crew-based duration calculation and reviewed natural-language entry are not implemented yet.
 - The payroll examples exercise fixed daily, weekly, and monthly pay. Attendance-based amounts, wage-advance instalments, and statutory payroll rules still need dedicated implementation and checks.
 - Vehicle fuel claims and stock issues use standard records. Machinery engine hours, fuel efficiency dashboards, tools, and detailed subcontract tracking remain future work.

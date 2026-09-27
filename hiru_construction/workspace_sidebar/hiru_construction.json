@@ -34,6 +34,12 @@
     },
     {
       "type": "Link",
+      "label": "Construction Cost Plan",
+      "link_type": "DocType",
+      "link_to": "Construction Cost Plan"
+    },
+    {
+      "type": "Link",
       "label": "Budget",
       "link_type": "DocType",
       "link_to": "Budget"

@@ -1,0 +1,33 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:plan_name",
+ "creation": "2026-09-27 00:00:00.000000",
+ "doctype": "DocType",
+ "name": "Construction Cost Plan",
+ "engine": "InnoDB",
+ "field_order": ["plan_name", "project", "company", "currency", "status", "version_kind", "items", "total_original_estimate", "total_approved_revision", "total_contingency"],
+ "fields": [
+  {"fieldname":"plan_name","fieldtype":"Data","label":"Plan Name","reqd":1,"unique":1},
+  {"fieldname":"project","fieldtype":"Link","label":"Project","options":"Project","reqd":1,"in_list_view":1},
+  {"fieldname":"company","fieldtype":"Link","label":"Company","options":"Company","fetch_from":"project.company","read_only":1},
+  {"fieldname":"currency","fieldtype":"Link","label":"Currency","options":"Currency","fetch_from":"company.default_currency","read_only":1},
+  {"fieldname":"status","fieldtype":"Select","label":"Status","options":"Draft\nApproved\nSuperseded","default":"Draft","read_only":1,"in_list_view":1},
+  {"fieldname":"version_kind","fieldtype":"Select","label":"Version Kind","options":"Tender baseline\nApproved revision","default":"Tender baseline","reqd":1},
+  {"fieldname":"items","fieldtype":"Table","label":"Cost Lines","options":"Construction Cost Plan Item","reqd":1},
+  {"fieldname":"total_original_estimate","fieldtype":"Currency","label":"Original Tender Estimate","read_only":1,"in_list_view":1},
+  {"fieldname":"total_approved_revision","fieldtype":"Currency","label":"Approved Revision","read_only":1,"in_list_view":1},
+  {"fieldname":"total_contingency","fieldtype":"Currency","label":"Contingency","read_only":1,"in_list_view":1}
+ ],
+ "is_submittable": 1,
+ "module": "Construction",
+ "name_case": "Title Case",
+ "permissions": [
+  {"role":"System Manager","read":1,"write":1,"create":1,"submit":1,"cancel":1,"delete":1,"report":1,"export":1,"print":1},
+  {"role":"Projects Manager","read":1,"write":1,"create":1,"submit":1,"cancel":1,"report":1,"export":1,"print":1},
+  {"role":"Projects User","read":1,"report":1,"print":1}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
