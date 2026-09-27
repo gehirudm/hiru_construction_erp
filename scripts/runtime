@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+# Use an explicit context if requested; otherwise respect the user's Docker context.
+docker_cmd=(docker)
+if [[ -n "${HIRU_DOCKER_CONTEXT:-}" ]]; then
+  docker_cmd+=(--context "$HIRU_DOCKER_CONTEXT")
+fi
+compose=("${docker_cmd[@]}" compose)
+
+init_env() {
+  python3 - <<'PY'
+import os
+import secrets
+from pathlib import Path
+p = Path('.env')
+if not p.exists():
+    fd = os.open(p, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+    with os.fdopen(fd, 'w') as f:
+        f.write(f'DB_ROOT_PASSWORD={secrets.token_hex(24)}\n')
+        f.write(f'PILOT_ADMIN_PASSWORD={secrets.token_hex(16)}\n')
+        f.write('PILOT_PORT=8080\n')
+    print('Created .env with random local credentials (Git-ignored).')
+else:
+    print('Using existing .env; credentials preserved.')
+PY
+}
+
+case "${1:-help}" in
+  init) init_env ;;
+  start)
+    init_env
+    "${compose[@]}" build backend
+    "${compose[@]}" up -d --wait db redis-cache redis-queue
+    "${compose[@]}" run --rm --no-deps configurator
+    "${compose[@]}" run --rm --no-deps provision
+    "${compose[@]}" up -d --wait --wait-timeout 180 backend websocket worker scheduler frontend
+    ;;
+  seed|verify)
+    "${compose[@]}" exec -T backend bench --site hiru.localhost execute "hiru_construction.demo.$1.main"
+    ;;
+  stop) "${compose[@]}" stop ;;
+  status) "${compose[@]}" ps ;;
+  logs) "${compose[@]}" logs --tail=100 "${2:-backend}" ;;
+  *) echo 'Use make start, stop, sleep, status, seed, or verify.' ;;
+esac

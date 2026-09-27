@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+action=${1:-help}
+context=${HIRU_DOCKER_CONTEXT:-}
+if [[ -z "$context" ]] && command -v colima >/dev/null 2>&1; then
+  context=colima-hiru-erp
+  if [[ "$action" == start ]]; then
+    colima start hiru-erp --cpu 4 --memory 8 --disk 50 --vm-type vz --activate=false
+  fi
+fi
+docker_cmd=(docker)
+[[ -z "$context" ]] || docker_cmd+=(--context "$context")
+case "$action" in
+  stop|sleep)
+    if "${docker_cmd[@]}" info >/dev/null 2>&1; then
+      ids=$("${docker_cmd[@]}" ps -q --filter label=com.docker.compose.project=hiru-construction-pilot)
+      if [[ -n "$ids" ]]; then
+        containers=()
+        while IFS= read -r id; do containers+=("$id"); done <<< "$ids"
+        "${docker_cmd[@]}" stop "${containers[@]}"
+      fi
+      echo 'Development containers stopped; data volumes preserved.'
+    elif [[ "$context" == colima-hiru-erp ]] && ! colima status hiru-erp >/dev/null 2>&1; then
+      echo 'Development VM is already stopped.'
+    else
+      echo 'Cannot reach Docker; container state could not be verified.' >&2
+      exit 1
+    fi
+    if [[ "$action" == sleep && "$context" == colima-hiru-erp ]]; then
+      colima stop hiru-erp
+    fi
+    ;;
+  start|init|seed|verify|status|logs)
+    export HIRU_DOCKER_CONTEXT="$context"
+    exec ./scripts/runtime "$@"
+    ;;
+  *) echo 'Usage: make {start|stop|sleep|status|logs|seed|verify}' ;;
+esac

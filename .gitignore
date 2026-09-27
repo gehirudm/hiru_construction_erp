@@ -3,3 +3,11 @@
 
 # Local operating system files
 .DS_Store
+
+# Local runtime, credentials, and upstream checkouts
+/.local/
+/.env
+__pycache__/
+*.py[cod]
+.pytest_cache/
+/node_modules/

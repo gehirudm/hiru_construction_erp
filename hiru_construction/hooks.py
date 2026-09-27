@@ -1,0 +1,8 @@
+app_name = "hiru_construction"
+app_title = "Hiru Construction"
+app_publisher = "Hiru Construction"
+app_description = "Construction project management for ERPNext"
+app_email = ""
+app_license = "Proprietary"
+required_apps = ["erpnext", "hrms"]
+after_install = "hiru_construction.setup.after_install"

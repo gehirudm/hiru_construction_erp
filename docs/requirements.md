@@ -74,7 +74,7 @@ This is a capability map, not a final implementation choice. We will test standa
 ## Milestones
 
 1. **Requirements baseline — complete:** Capture the agreed scope and provisional defaults, with synthetic pilot data where real examples are unavailable.
-2. **ERPNext pilot:** Set up a development instance with a sample project, expense, budget, task, payroll case, and vehicle log; document what standard features cover.
+2. **ERPNext pilot and application foundation — complete:** Install the custom Frappe app alongside ERPNext/HRMS, preserve development data, provide simple lifecycle commands, and validate a synthetic project with expenses, budgets, tasks, payroll, stock and a vehicle log. The first category-management forms are also available; category/account mapping and cost dashboards remain subsequent work.
 3. **Project cost view:** Implement the agreed tender baseline, category mapping, and budget/actual/commitment dashboard.
 4. **People and fleet:** Configure payroll/advances and fuel capture with project allocation and useful reports.
 5. **Planning:** Add capacity-aware scheduling and reviewed natural-language work-item entry.

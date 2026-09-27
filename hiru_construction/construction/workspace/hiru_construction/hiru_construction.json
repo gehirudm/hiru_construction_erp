@@ -1,0 +1,129 @@
+{
+  "doctype": "Workspace",
+  "name": "Hiru Construction",
+  "title": "Hiru Construction",
+  "label": "Hiru Construction",
+  "module": "Construction",
+  "app": "hiru_construction",
+  "public": 1,
+  "is_hidden": 0,
+  "icon": "project",
+  "sequence_id": 1,
+  "content": "[{\"id\":\"construction-title\",\"type\":\"header\",\"data\":{\"text\":\"<b>Hiru Construction</b>\",\"col\":12}},{\"id\":\"construction-card-0\",\"type\":\"card\",\"data\":{\"card_name\":\"Projects and costs\",\"col\":4}},{\"id\":\"construction-card-1\",\"type\":\"card\",\"data\":{\"card_name\":\"People and time\",\"col\":4}},{\"id\":\"construction-card-2\",\"type\":\"card\",\"data\":{\"card_name\":\"Vehicles and materials\",\"col\":4}}]",
+  "links": [
+    {
+      "type": "Card Break",
+      "label": "Projects and costs"
+    },
+    {
+      "type": "Link",
+      "label": "Project",
+      "link_type": "DocType",
+      "link_to": "Project"
+    },
+    {
+      "type": "Link",
+      "label": "Task",
+      "link_type": "DocType",
+      "link_to": "Task"
+    },
+    {
+      "type": "Link",
+      "label": "Construction Cost Category",
+      "link_type": "DocType",
+      "link_to": "Construction Cost Category"
+    },
+    {
+      "type": "Link",
+      "label": "Budget",
+      "link_type": "DocType",
+      "link_to": "Budget"
+    },
+    {
+      "type": "Link",
+      "label": "Purchase Order",
+      "link_type": "DocType",
+      "link_to": "Purchase Order"
+    },
+    {
+      "type": "Link",
+      "label": "Purchase Invoice",
+      "link_type": "DocType",
+      "link_to": "Purchase Invoice"
+    },
+    {
+      "type": "Card Break",
+      "label": "People and time"
+    },
+    {
+      "type": "Link",
+      "label": "Employee",
+      "link_type": "DocType",
+      "link_to": "Employee"
+    },
+    {
+      "type": "Link",
+      "label": "Attendance",
+      "link_type": "DocType",
+      "link_to": "Attendance"
+    },
+    {
+      "type": "Link",
+      "label": "Timesheet",
+      "link_type": "DocType",
+      "link_to": "Timesheet"
+    },
+    {
+      "type": "Link",
+      "label": "Payroll Entry",
+      "link_type": "DocType",
+      "link_to": "Payroll Entry"
+    },
+    {
+      "type": "Link",
+      "label": "Salary Slip",
+      "link_type": "DocType",
+      "link_to": "Salary Slip"
+    },
+    {
+      "type": "Card Break",
+      "label": "Vehicles and materials"
+    },
+    {
+      "type": "Link",
+      "label": "Vehicle",
+      "link_type": "DocType",
+      "link_to": "Vehicle"
+    },
+    {
+      "type": "Link",
+      "label": "Vehicle Log",
+      "link_type": "DocType",
+      "link_to": "Vehicle Log"
+    },
+    {
+      "type": "Link",
+      "label": "Expense Claim",
+      "link_type": "DocType",
+      "link_to": "Expense Claim"
+    },
+    {
+      "type": "Link",
+      "label": "Item",
+      "link_type": "DocType",
+      "link_to": "Item"
+    },
+    {
+      "type": "Link",
+      "label": "Stock Entry",
+      "link_type": "DocType",
+      "link_to": "Stock Entry"
+    }
+  ],
+  "roles": [],
+  "charts": [],
+  "shortcuts": [],
+  "quick_lists": [],
+  "number_cards": [],
+  "custom_blocks": []
+}

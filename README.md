@@ -1,8 +1,18 @@
 # Construction ERP
 
-Planning documentation for an ERPNext-based system for a construction business managing several projects at once.
+An installable Frappe app extending ERPNext and Frappe HR for construction project management.
 
-The current [requirements baseline](docs/requirements.md) captures the pilot scope, chosen defaults, and details to validate before live use. Milestone devlogs are kept locally in `devlogs/` and excluded from Git. No ERPNext instance or application code has been set up yet.
+The [requirements baseline](docs/requirements.md) captures scope and decisions. See [development instructions](docs/pilot.md) and [architecture](docs/architecture.md). Private milestone devlogs live in Git-ignored `devlogs/`.
+
+```sh
+make start   # start the development VM, containers, and migrate the app
+make stop    # stop this project's containers; preserve all data
+make sleep   # also stop the dedicated Colima VM to free memory
+```
+
+Open http://localhost:8080. Login: `Administrator`; password: `PILOT_ADMIN_PASSWORD` in local `.env`. Demo data is optional: `make seed`, then `make verify`.
+
+This is a development environment. Live deployment, backups, supervisor permissions, and statutory payroll configuration remain future work.
 
 ## Working agreement
 

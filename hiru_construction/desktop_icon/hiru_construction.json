@@ -1,0 +1,13 @@
+{
+  "doctype": "Desktop Icon",
+  "name": "Hiru Construction",
+  "label": "Hiru Construction",
+  "app": "hiru_construction",
+  "standard": 1,
+  "icon": "project",
+  "icon_type": "Link",
+  "link_type": "Workspace Sidebar",
+  "link_to": "Hiru Construction",
+  "hidden": 0,
+  "roles": []
+}

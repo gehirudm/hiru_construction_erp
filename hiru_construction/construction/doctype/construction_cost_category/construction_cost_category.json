@@ -1,0 +1,95 @@
+{
+  "doctype": "DocType",
+  "name": "Construction Cost Category",
+  "module": "Construction",
+  "custom": 0,
+  "autoname": "hash",
+  "engine": "InnoDB",
+  "track_changes": 1,
+  "title_field": "category_name",
+  "search_fields": "category_name,project",
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "field_order": [
+    "category_name",
+    "scope",
+    "project",
+    "disabled",
+    "description",
+    "scope_key"
+  ],
+  "fields": [
+    {
+      "fieldname": "category_name",
+      "label": "Category Name",
+      "fieldtype": "Data",
+      "reqd": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "scope",
+      "label": "Scope",
+      "fieldtype": "Select",
+      "options": "Global\nProject",
+      "default": "Global",
+      "reqd": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "project",
+      "label": "Project",
+      "fieldtype": "Link",
+      "options": "Project",
+      "depends_on": "eval:doc.scope == 'Project'",
+      "mandatory_depends_on": "eval:doc.scope == 'Project'",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "disabled",
+      "label": "Disabled",
+      "fieldtype": "Check",
+      "default": "0"
+    },
+    {
+      "fieldname": "description",
+      "label": "Description",
+      "fieldtype": "Small Text"
+    },
+    {
+      "fieldname": "scope_key",
+      "label": "Scope Key",
+      "fieldtype": "Data",
+      "hidden": 1,
+      "read_only": 1,
+      "unique": 1
+    }
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1
+    },
+    {
+      "role": "Projects Manager",
+      "read": 1,
+      "write": 1,
+      "create": 1,
+      "delete": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1
+    },
+    {
+      "role": "Projects User",
+      "read": 1,
+      "report": 1,
+      "print": 1
+    }
+  ]
+}

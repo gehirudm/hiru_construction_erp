@@ -1,0 +1,78 @@
+{
+  "doctype": "Workspace Sidebar",
+  "name": "Hiru Construction",
+  "title": "Hiru Construction",
+  "app": "hiru_construction",
+  "module": "Construction",
+  "standard": 1,
+  "header_icon": "project",
+  "items": [
+    {
+      "type": "Link",
+      "label": "Home",
+      "link_type": "Workspace",
+      "link_to": "Hiru Construction",
+      "icon": "home"
+    },
+    {
+      "type": "Link",
+      "label": "Project",
+      "link_type": "DocType",
+      "link_to": "Project"
+    },
+    {
+      "type": "Link",
+      "label": "Task",
+      "link_type": "DocType",
+      "link_to": "Task"
+    },
+    {
+      "type": "Link",
+      "label": "Construction Cost Category",
+      "link_type": "DocType",
+      "link_to": "Construction Cost Category"
+    },
+    {
+      "type": "Link",
+      "label": "Budget",
+      "link_type": "DocType",
+      "link_to": "Budget"
+    },
+    {
+      "type": "Link",
+      "label": "Purchase Invoice",
+      "link_type": "DocType",
+      "link_to": "Purchase Invoice"
+    },
+    {
+      "type": "Link",
+      "label": "Employee",
+      "link_type": "DocType",
+      "link_to": "Employee"
+    },
+    {
+      "type": "Link",
+      "label": "Attendance",
+      "link_type": "DocType",
+      "link_to": "Attendance"
+    },
+    {
+      "type": "Link",
+      "label": "Payroll Entry",
+      "link_type": "DocType",
+      "link_to": "Payroll Entry"
+    },
+    {
+      "type": "Link",
+      "label": "Vehicle",
+      "link_type": "DocType",
+      "link_to": "Vehicle"
+    },
+    {
+      "type": "Link",
+      "label": "Stock Entry",
+      "link_type": "DocType",
+      "link_to": "Stock Entry"
+    }
+  ]
+}

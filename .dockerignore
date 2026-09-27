@@ -1,0 +1,9 @@
+*
+!Dockerfile
+!pyproject.toml
+!hiru_construction/
+!hiru_construction/**
+!scripts/
+!scripts/provision.sh
+**/__pycache__/
+**/*.pyc

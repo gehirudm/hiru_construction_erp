@@ -1,0 +1,15 @@
+[build-system]
+requires = ["flit_core>=3.4,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "hiru_construction"
+authors = [{name = "Hiru Construction"}]
+description = "Construction project management for ERPNext"
+requires-python = ">=3.14"
+dynamic = ["version"]
+
+[tool.bench.frappe-dependencies]
+frappe = ">=16.35.0,<17.0.0"
+erpnext = ">=16.36.0,<17.0.0"
+hrms = ">=16.20.0,<17.0.0"

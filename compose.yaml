@@ -1,0 +1,108 @@
+name: hiru-construction-pilot
+
+x-app: &app
+  image: hiru-construction:pilot-v16
+  build: .
+  volumes:
+    - sites:/home/frappe/frappe-bench/sites
+    - logs:/home/frappe/frappe-bench/logs
+    - ./hiru_construction:/home/frappe/frappe-bench/apps/hiru_construction/hiru_construction:ro
+  environment: &app-env
+    FRAPPE_REDIS_CACHE: redis://redis-cache:6379
+    FRAPPE_REDIS_QUEUE: redis://redis-queue:6379
+
+services:
+  db:
+    image: mariadb:11.8.3@sha256:ae6119716edac6998ae85508431b3d2e666530ddf4e94c61a10710caec9b0f71
+    command: [--character-set-server=utf8mb4, --collation-server=utf8mb4_unicode_ci, --skip-character-set-client-handshake]
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Run make start first}
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: [CMD, healthcheck.sh, --connect, --innodb_initialized]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+
+  redis-cache:
+    image: redis:7.4.2-alpine@sha256:02419de7eddf55aa5bcf49efb74e88fa8d931b4d77c07eff8a6b2144472b6952
+    restart: unless-stopped
+
+  redis-queue:
+    image: redis:7.4.2-alpine@sha256:02419de7eddf55aa5bcf49efb74e88fa8d931b4d77c07eff8a6b2144472b6952
+    volumes:
+      - redis-queue:/data
+    restart: unless-stopped
+
+  configurator:
+    <<: *app
+    entrypoint: [bash, -ec]
+    command:
+      - |
+        ls -1 apps > sites/apps.txt
+        bench set-config -g db_host db
+        bench set-config -gp db_port 3306
+        bench set-config -g redis_cache redis://redis-cache:6379
+        bench set-config -g redis_queue redis://redis-queue:6379
+        bench set-config -g redis_socketio redis://redis-queue:6379
+        bench set-config -gp socketio_port 9000
+    profiles: [setup]
+
+  provision:
+    <<: *app
+    command: [bash, /opt/hiru/scripts/provision.sh]
+    environment:
+      <<: *app-env
+      DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Run make start first}
+      PILOT_ADMIN_PASSWORD: ${PILOT_ADMIN_PASSWORD:?Run make start first}
+    profiles: [setup]
+
+  backend:
+    <<: *app
+    restart: unless-stopped
+
+  websocket:
+    <<: *app
+    command: [node, /home/frappe/frappe-bench/apps/frappe/socketio.js]
+    restart: unless-stopped
+
+  worker:
+    <<: *app
+    command: [bench, worker, --queue, "long,default,short"]
+    restart: unless-stopped
+
+  scheduler:
+    <<: *app
+    command: [bench, schedule]
+    restart: unless-stopped
+
+  frontend:
+    <<: *app
+    command: [nginx-entrypoint.sh]
+    environment:
+      BACKEND: backend:8000
+      FRAPPE_SITE_NAME_HEADER: hiru.localhost
+      SOCKETIO: websocket:9000
+      UPSTREAM_REAL_IP_ADDRESS: 127.0.0.1
+      UPSTREAM_REAL_IP_HEADER: X-Forwarded-For
+      UPSTREAM_REAL_IP_RECURSIVE: "off"
+      PROXY_READ_TIMEOUT: "120"
+      CLIENT_MAX_BODY_SIZE: 50m
+    ports:
+      - "127.0.0.1:${PILOT_PORT:-8080}:8080"
+    depends_on: [backend, websocket]
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/api/method/ping', timeout=5)"]
+      interval: 5s
+      timeout: 10s
+      retries: 24
+      start_period: 20s
+    restart: unless-stopped
+
+volumes:
+  sites:
+  logs:
+  db-data:
+  redis-queue:
