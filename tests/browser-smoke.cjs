@@ -47,8 +47,26 @@ async function main() {
     await page.goto(base + '/desk/construction-cost-category');
     await page.getByText('Materials', { exact: true }).first().waitFor();
     await page.screenshot({ path: '.local/screenshots/categories.png', fullPage: true });
+    await page.goto(base + '/desk/query-report/Construction%20Project%20Costs?project=PILOT-PROJECT-001');
+    await page.waitForFunction(() => window.frappe?.query_report?.data?.length === 4);
+    const totals = await page.evaluate(() => frappe.query_report.data.reduce((sum, row) => ({
+      budget: sum.budget + row.current_budget, actual: sum.actual + row.actual,
+      commitment: sum.commitment + row.commitment, remaining: sum.remaining + row.remaining_budget
+    }), { budget: 0, actual: 0, commitment: 0, remaining: 0 }));
+    assert.deepEqual(totals, { budget: 375000, actual: 132000, commitment: 60000, remaining: 183000 });
+    await page.waitForFunction(() => [...document.querySelectorAll('.chart-container .bar')]
+      .some(bar => bar.getBoundingClientRect().height > 5));
+    await page.screenshot({ path: '.local/screenshots/project-costs.png', fullPage: true });
+    await page.goto(base + '/desk/construction-cost-plan/PILOT-TENDER-001');
+    await page.getByRole('button', { name: 'Create Revision', exact: true }).click();
+    await page.waitForFunction(() => window.cur_frm?.doc?.version_kind === 'Approved revision');
+    const revision = await page.evaluate(() => ({
+      baseline: cur_frm.doc.baseline, rows: cur_frm.doc.items.length,
+      preservesTender: cur_frm.doc.items.every(row => row.original_estimate === row.approved_revision)
+    }));
+    assert.deepEqual(revision, { baseline: 'PILOT-TENDER-001', rows: 4, preservesTender: true });
     assert.deepEqual(errors, [], 'Unexpected browser errors');
-    console.log('PASS: login, workspaces, seeded project, and cost categories render without JavaScript errors.');
+    console.log('PASS: login, workspace, project, categories, cost report totals, and revision form without JavaScript errors.');
   } finally {
     await browser.close();
   }

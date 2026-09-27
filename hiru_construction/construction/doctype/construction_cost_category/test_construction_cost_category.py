@@ -6,6 +6,12 @@ IGNORE_TEST_RECORD_DEPENDENCIES = ["Project"]
 
 
 class TestConstructionCostCategory(IntegrationTestCase):
+    @classmethod
+    def setUpClass(cls):
+        if not frappe.conf.get("hiru_test"):
+            raise RuntimeError("Use make test to run on the isolated test site")
+        super().setUpClass()
+
     def category(self, name, **values):
         return frappe.get_doc({"doctype": "Construction Cost Category", "category_name": name,
                                "scope": "Global", **values}).insert()
@@ -20,7 +26,8 @@ class TestConstructionCostCategory(IntegrationTestCase):
 
     def test_project_categories_are_independent(self):
         name = "Test " + frappe.generate_hash(length=10)
-        projects = [frappe.get_doc({"doctype": "Project", "project_name": name + str(i)}).insert()
+        projects = [frappe.get_doc({"doctype": "Project", "project_name": name + str(i),
+                                   "company": "Cost Controls Test"}).insert()
                     for i in range(2)]
         global_category = self.category(name)
         local = [self.category(name, scope="Project", project=p.name) for p in projects]

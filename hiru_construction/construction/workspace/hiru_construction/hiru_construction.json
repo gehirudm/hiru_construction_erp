@@ -41,6 +41,13 @@
     },
     {
       "type": "Link",
+      "label": "Construction Project Costs",
+      "link_type": "Report",
+      "link_to": "Construction Project Costs",
+      "is_query_report": 1
+    },
+    {
+      "type": "Link",
       "label": "Budget",
       "link_type": "DocType",
       "link_to": "Budget"

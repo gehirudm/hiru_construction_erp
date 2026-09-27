@@ -1,0 +1,13 @@
+{
+ "doctype": "Report",
+ "name": "Construction Project Costs",
+ "report_name": "Construction Project Costs",
+ "module": "Construction",
+ "ref_doctype": "Construction Cost Plan",
+ "report_type": "Script Report",
+ "is_standard": "Yes",
+ "disabled": 0,
+ "prepared_report": 0,
+ "add_total_row": 0,
+ "roles": [{"role": "System Manager"}, {"role": "Projects Manager"}]
+}

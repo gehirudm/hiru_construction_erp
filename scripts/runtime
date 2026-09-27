@@ -40,8 +40,9 @@ case "${1:-help}" in
   seed|verify)
     "${compose[@]}" exec -T backend bench --site hiru.localhost execute "hiru_construction.demo.$1.main"
     ;;
+  test) "${compose[@]}" run --rm --no-deps tests ;;
   stop) "${compose[@]}" stop ;;
   status) "${compose[@]}" ps ;;
   logs) "${compose[@]}" logs --tail=100 "${2:-backend}" ;;
-  *) echo 'Use make start, stop, sleep, status, seed, or verify.' ;;
+  *) echo 'Use make start, stop, sleep, status, seed, verify, or test.' ;;
 esac

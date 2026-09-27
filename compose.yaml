@@ -63,6 +63,20 @@ services:
     <<: *app
     restart: unless-stopped
 
+  tests:
+    <<: *app
+    command: [bash, /opt/hiru/scripts/test-site.sh]
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
+      - logs:/home/frappe/frappe-bench/logs
+      - ./hiru_construction:/home/frappe/frappe-bench/apps/hiru_construction/hiru_construction:ro
+      - ./scripts/test-site.sh:/opt/hiru/scripts/test-site.sh:ro
+    environment:
+      <<: *app-env
+      DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Run make start first}
+      PILOT_ADMIN_PASSWORD: ${PILOT_ADMIN_PASSWORD:?Run make start first}
+    profiles: [test]
+
   websocket:
     <<: *app
     command: [node, /home/frappe/frappe-bench/apps/frappe/socketio.js]

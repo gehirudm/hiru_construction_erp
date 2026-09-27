@@ -140,6 +140,20 @@ def setup_purchase(company):
     ensure("Purchase Invoice", "PILOT-PINV-001", {}, submit=True)
 
 
+def setup_cost_plan(company):
+    lines = []
+    for category, amount in [("Subcontractors", 150000), ("Labour", 150000),
+                             ("Fuel", 25000), ("Materials", 50000)]:
+        category_name = frappe.db.get_value("Construction Cost Category",
+            {"category_name": category, "scope": "Global"}, "name")
+        lines.append({"category": category_name, "account": account(category),
+                      "original_estimate": amount, "contingency": 0})
+    ensure("Construction Cost Plan", "PILOT-TENDER-001", {
+        "plan_name": "PILOT-TENDER-001", "project": PROJECT,
+        "version_kind": "Tender baseline", "items": lines,
+    }, submit=True)
+
+
 def setup_people(company):
     ensure("Gender", "Male", {"gender": "Male"})
     ensure("Salary Component", "PILOT Basic", {
@@ -268,7 +282,7 @@ def main():
     if frappe.get_all("Company", filters={"name": ["!=", COMPANY]}, limit=1):
         raise RuntimeError("Refusing to seed alongside other companies")
     company = setup_company()
-    for fn in [setup_project, setup_purchase, setup_people, setup_materials, setup_fuel]:
+    for fn in [setup_project, setup_purchase, setup_people, setup_materials, setup_fuel, setup_cost_plan]:
         fn(company)
         frappe.db.commit()
         print(f"Completed {fn.__name__}")

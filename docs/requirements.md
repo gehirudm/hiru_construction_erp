@@ -75,10 +75,11 @@ This is a capability map, not a final implementation choice. We will test standa
 
 1. **Requirements baseline — complete:** Capture the agreed scope and provisional defaults, with synthetic pilot data where real examples are unavailable.
 2. **ERPNext pilot and application foundation — complete:** Install the custom Frappe app alongside ERPNext/HRMS, preserve development data, provide simple lifecycle commands, and validate a synthetic project with expenses, budgets, tasks, payroll, stock and a vehicle log. The first category-management forms are also available; category/account mapping and cost dashboards remain subsequent work.
-3. **Tender and cost plan — in progress:** Capture one immutable tender baseline and separately approved revisions per project, with category/account lines and contingency. Actual-versus-plan dashboards and forecast logic follow after transaction mapping is agreed.
-3. **Project cost view:** Implement the agreed tender baseline, category mapping, and budget/actual/commitment dashboard.
-4. **People and fleet:** Configure payroll/advances and fuel capture with project allocation and useful reports.
-5. **Planning:** Add capacity-aware scheduling and reviewed natural-language work-item entry.
+3. **Tender and cost plan — complete:** Submitted tender protection, controlled revisions, account/category validation and cancellation recovery.
+4. **Current project cost view — complete:** Category chart and report comparing submitted tender/current budget with actual expense postings and uninvoiced orders. Unmapped costs remain visible; possible receipt/accrual overlaps require reconciliation. See [calculation boundaries](cost-reporting.md).
+5. **Forecasts and trends:** Add separately maintained estimates of further uncommitted work, historical comparisons and receipt reconciliation automation.
+6. **People and fleet:** Configure payroll/advances and fuel capture with project allocation and useful reports.
+7. **Planning:** Add capacity-aware scheduling and reviewed natural-language work-item entry.
 
 Each completed milestone gets a separate local, Git-ignored numbered devlog and a Git commit for the corresponding repository changes. Future milestone scope and order may change after the pilot.
 

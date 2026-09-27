@@ -12,6 +12,8 @@ make sleep   # also stop the dedicated Colima VM to free memory
 
 Open http://localhost:8080. Login: `Administrator`; password: `PILOT_ADMIN_PASSWORD` in local `.env`. Demo data is optional: `make seed`, then `make verify`.
 
+Use **Hiru Construction → Construction Project Costs** for the category chart and tender/budget/expense/order comparison. [Cost reporting guide](docs/cost-reporting.md) explains approval, revisions, and calculation boundaries. `make test` runs automated checks on a separate test site; it never runs them against the demo company.
+
 This is a development environment. Live deployment, backups, supervisor permissions, and statutory payroll configuration remain future work.
 
 ## Working agreement
