@@ -40,7 +40,7 @@ async function main() {
     await page.waitForFunction(() => document.querySelectorAll('.crew-row').length === 3);
     await page.screenshot({ path: '.local/screenshots/crew-demo.png', fullPage: true });
     await page.getByRole('button', { name: 'Expense categories', exact: true }).click();
-    await page.waitForFunction(() => document.querySelectorAll('.category-card').length === 4);
+    await page.waitForFunction(() => document.querySelectorAll('.category-card').length === 5);
     await page.screenshot({ path: '.local/screenshots/categories-demo.png', fullPage: true });
     await page.goto(base + '/desk/hiru-construction');
     await page.getByText('Construction Cost Category', { exact: true }).first().waitFor();
@@ -58,12 +58,12 @@ async function main() {
     await page.getByText('Materials', { exact: true }).first().waitFor();
     await page.screenshot({ path: '.local/screenshots/categories.png', fullPage: true });
     await page.goto(base + '/desk/query-report/Construction%20Project%20Costs?project=PILOT-PROJECT-001');
-    await page.waitForFunction(() => window.frappe?.query_report?.data?.length === 4);
+    await page.waitForFunction(() => window.frappe?.query_report?.data?.length === 5);
     const totals = await page.evaluate(() => frappe.query_report.data.reduce((sum, row) => ({
       budget: sum.budget + row.current_budget, actual: sum.actual + row.actual,
       commitment: sum.commitment + row.commitment, remaining: sum.remaining + row.remaining_budget
     }), { budget: 0, actual: 0, commitment: 0, remaining: 0 }));
-    assert.deepEqual(totals, { budget: 375000, actual: 132000, commitment: 60000, remaining: 183000 });
+    assert.deepEqual(totals, { budget: 405000, actual: 132000, commitment: 60000, remaining: 213000 });
     await page.waitForFunction(() => [...document.querySelectorAll('.chart-container .bar')]
       .some(bar => bar.getBoundingClientRect().height > 5));
     await page.screenshot({ path: '.local/screenshots/project-costs.png', fullPage: true });

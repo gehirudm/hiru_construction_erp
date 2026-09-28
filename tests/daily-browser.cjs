@@ -12,9 +12,9 @@ async function main() {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1100 } });
   const page = await context.newPage();
   page.setDefaultTimeout(20000);
-  let invoice, receipt, csrf, fuelInvoice, attendanceName;
+  let invoice, receipt, csrf, fuelInvoice, attendanceName, mealInvoice;
   const errors = [];
-  page.on('pageerror', error => errors.push(error.message));
+  page.on('pageerror', error => { errors.push(error.message); console.error('Browser error:', error.message); });
   async function call(method, args) {
     const response = await context.request.post(base + '/api/method/' + method, {
       headers: { 'X-Frappe-CSRF-Token': csrf }, data: args
@@ -114,9 +114,52 @@ async function main() {
     await page.locator('.category-card').click();
     await page.getByText(/Spent LKR\s*3,000.25/).waitFor();
     await page.screenshot({ path: '.local/screenshots/category-detail-mobile.png', fullPage: true });
+    await page.locator('#close-work-dialog').click();
+    await page.selectOption('#project', 'UI-MEALS-PROJECT');
+    await page.waitForFunction(() => document.querySelector('#project-title').textContent === 'Meals workflow test');
+    await page.getByRole('button', { name: 'Meals', exact: true }).click();
+    await page.getByText('2 people suggested from confirmed present/half-day attendance. Adjust separately for each meal.', { exact: true }).waitFor();
+    await page.getByRole('button', { name: 'Expected costs per person', exact: true }).click();
+    await page.locator('[data-meal-type="Lunch"]').fill('100');
+    await page.getByRole('button', { name: 'Save expected costs', exact: true }).click();
+    await page.locator('#work-dialog').waitFor({ state: 'hidden' });
+    const lunch = page.locator('#work-panel .category-card').filter({ has: page.getByRole('heading', { name: 'Lunch', exact: true }) });
+    const edit = lunch.getByRole('button', { name: 'Adjust diners', exact: true });
+    if (await edit.count()) await edit.click();
+    else await lunch.getByRole('button', { name: 'Set up lunch', exact: true }).click();
+    await page.fill('#meal-diners', '1'); await page.fill('#meal-reason', 'One worker did not take lunch');
+    await page.getByRole('button', { name: 'Save meal headcount', exact: true }).click();
+    await page.locator('#work-dialog').waitFor({ state: 'hidden' });
+    await lunch.getByRole('button', { name: 'Add lunch expense', exact: true }).click();
+    await page.selectOption('#supplier', { label: 'Daily UI Supplier' }); await page.fill('#amount', '150');
+    const invalidMealFields = await page.locator('#expense-form').evaluate(form => [...form.querySelectorAll('input,select')]
+      .filter(input => !input.checkValidity()).map(input => ({ id: input.id, value: input.value, message: input.validationMessage })));
+    assert.deepEqual(invalidMealFields, [], 'Meal expense form is invalid');
+    const mealSaved = page.waitForResponse(r => r.url().endsWith('daily.save_expense'));
+    await page.getByRole('button', { name: 'Save draft & review' }).click();
+    const mealResponse = await mealSaved.catch(async error => {
+      console.error('Meal entry status:', await page.locator('#expense-error').textContent(),
+        await page.locator('#save-draft').textContent());
+      throw error;
+    });
+    const mealData = await mealResponse.json();
+    assert.ok(mealData.message?.name, JSON.stringify(mealData)); mealInvoice = mealData.message.name;
+    await page.getByText(/OVER EXPECTED COST/).waitFor();
+    await page.getByRole('button', { name: 'Confirm & record expense' }).click();
+    await page.getByRole('heading', { name: 'Expense recorded', exact: true }).waitFor();
+    await page.getByRole('button', { name: 'Done', exact: true }).click();
+    await page.locator('#meal-alert').waitFor();
+    await lunch.getByText(/LKR\s*50.00 over this meal/).waitFor();
+    await page.screenshot({ path: '.local/screenshots/meals-mobile.png', fullPage: true });
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
     assert.deepEqual(errors, [], 'JavaScript errors');
-    console.log('PASS: daily home, mobile layouts, private receipts, expenses, crew attendance/OT, linked fuel and category drilldown.');
+    console.log('PASS: daily home, receipts, attendance/OT, fuel, categories, meal attendance suggestion, adjusted diners and over-limit alerts.');
   } finally {
+    if (mealInvoice && csrf) {
+      const doc = await call('hiru_construction.daily.expense', { name: mealInvoice });
+      if (doc.docstatus === 1) await call('frappe.client.cancel', { doctype: 'Purchase Invoice', name: mealInvoice });
+      else if (doc.docstatus === 0) await call('frappe.client.delete', { doctype: 'Purchase Invoice', name: mealInvoice });
+    }
     if (attendanceName && csrf) {
       const doc = await call('frappe.client.get', { doctype: 'Attendance', name: attendanceName });
       if (doc.docstatus === 1) await call('frappe.client.cancel', { doctype: 'Attendance', name: attendanceName });

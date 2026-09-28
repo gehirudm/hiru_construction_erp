@@ -60,10 +60,11 @@ def main():
                "warehouse": "PILOT Site Store - HCD"}, "actual_qty")), 6, "stock on hand")
     from hiru_construction.construction.report.construction_project_costs.construction_project_costs import execute
     rows = execute({"project": PROJECT})[1]
-    equal(sum(row["current_budget"] for row in rows), 375000, "report budget")
+    equal(sum(row["original_budget"] for row in rows), 375000, "original tender preserved")
+    equal(sum(row["current_budget"] for row in rows), 405000, "report budget including meals")
     equal(sum(row["actual"] for row in rows), 132000, "report actuals")
     equal(sum(row["commitment"] for row in rows), 60000, "report commitments")
-    equal(sum(row["remaining_budget"] for row in rows), 183000, "report budget remaining")
+    equal(sum(row["remaining_budget"] for row in rows), 213000, "report budget remaining")
     print(json.dumps({"passed": True, "project_actuals_lkr": actuals,
                       "open_commitments_lkr": open_commitment,
                       "total_actual_lkr": sum(actuals.values())}, indent=2))

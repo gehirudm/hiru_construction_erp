@@ -12,4 +12,4 @@ def get_context(context):
     require_manager()
     context.csrf_token = frappe.sessions.get_csrf_token()
     context.display_name = frappe.get_cached_value("User", frappe.session.user, "full_name")
-    context.asset_version = "daily-2"
+    context.asset_version = "daily-4"

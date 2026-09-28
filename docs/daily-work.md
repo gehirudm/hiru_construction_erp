@@ -6,7 +6,7 @@ Choose a project to see its approved budget, posted expenses, open purchase orde
 
 ## Record an expense
 
-Use the four daily tabs for **Overview**, **Attendance & OT**, **Expense categories**, and **Fuel & equipment**.
+Use the daily tabs for **Overview**, **Attendance & OT**, **Expense categories**, **Fuel & equipment**, and **Meals**.
 
 1. Select **Record expense**, choose a budget category, and describe the cost.
 2. Select or add the supplier, enter the total and date, and indicate whether it has already been paid from business cash or bank.
@@ -38,6 +38,20 @@ Fuel categories have **Expense Entry Type = Fuel**. Selecting one, or pressing *
 Fuel is stored on the same Purchase Invoice as the expense. There is no additional Vehicle Log or Expense Claim, avoiding a second payable or cost. Readings are checked against posted fuel invoices across projects and existing vehicle readings/log dates, including again when a draft is posted. Enter fuel chronologically; a reading cannot move backwards. Cancellations remove the invoice from fuel history and accounting totals without altering the standard Vehicle master.
 
 The fuel tab shows the latest 20 fills recorded through this workflow. Earlier Vehicle Logs remain in the fleet workspace. Purchased litres are not actual fuel consumption; efficiency calculations need reliable tank/usage data and remain future work. Company-owned vehicles and machinery must first exist in setup.
+
+### Meals
+
+Meals is a reusable expense category with **Expense Entry Type = Meals**. Include it in the project's tender or approved budget revision. Open **Meals**, choose a date, and set expected costs per person for breakfast, lunch and dinner as needed. These rates use the project's company currency and apply to new meals only.
+
+The suggested headcount counts distinct employees with confirmed Present or Half Day attendance on that project/date. Drafts, absences, leave and attendance on other projects are excluded. Each meal has its own actual diner count, so someone who skipped lunch need not be counted. A manual difference requires a reason. With no confirmed attendance, enter the actual count and explain it, or confirm attendance first. Meal records require at least one diner; a zero count cannot produce a per-head figure.
+
+Save the meal headcount, then use **Add breakfast/lunch/dinner expense**. Several supplier bills can link to the same meal; their posted totals are combined and divided by its single headcount. Draft bills do not count. The review previews the cost per head after the current bill is posted. Meals post through the same Purchase Invoice expense path and are counted once in project costs.
+
+An over-limit meal is highlighted on its card, in recent meals and in a project alert banner. A standard ERPNext in-app notification goes to the meal record's creator (initially the owner); this notification type never emails. The threshold is strictly greater than expected rate × actual diners. Cancellation or a headcount correction recalculates the warning. Prior notifications remain as history, while the banner reflects current over-limit meals.
+
+Attendance suggestions and expected rates are historical snapshots. Later attendance/rate changes do not rewrite saved meals. Diner corrections require the current record version and an explanation, and are tracked in document versions. The view shows the latest 30 meals and up to 50 current alert references; each meal's totals include all its linked posted bills.
+
+The demo adds a synthetic LKR 30,000 Meals budget through `PILOT-MEALS-BUDGET-001`, preserving the LKR 375,000 original tender and bringing its current budget to LKR 405,000. Example breakfast/lunch/dinner rates are LKR 200/350/300, not recommended business rates. Existing expenses remain unchanged. Set real rates before entering live costs.
 
 ### Permissions and tests
 

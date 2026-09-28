@@ -139,7 +139,7 @@ def canonical(payload):
         frappe.throw(_("Enter a positive amount with at most two decimal places and retry."))
     data = {field: str(payload.get(field) or "").strip() for field in
         ("project", "account", "supplier", "description", "date", "paid_from", "bill_no",
-         "vehicle", "machine", "litres", "meter")}
+         "vehicle", "machine", "litres", "meter", "meal")}
     if not all(data[f] for f in ("project", "account", "supplier", "description", "date")):
         frappe.throw(_("Choose a project, category and supplier, then enter a date and description."))
     if len(data["description"]) > 500 or len(data["bill_no"]) > 140:
@@ -202,6 +202,7 @@ def save_expense(payload):
         "remarks": data["description"],
         "custom_construction_entry_id": request_id, "custom_construction_request_hash": digest,
         "custom_construction_category": mapping["category"],
+        "custom_construction_meal": data["meal"],
         "custom_construction_vehicle": data["vehicle"], "custom_construction_machine": data["machine"],
         "custom_construction_litres": data["litres"] or 0, "custom_construction_meter": data["meter"] or 0,
         "custom_construction_meter_recorded": bool(data["meter"]),
@@ -234,12 +235,17 @@ def expense(name):
         frappe.throw(_("Open this bill in the advanced accounts view."))
     files = frappe.get_list("File", filters={"attached_to_doctype": "Purchase Invoice", "attached_to_name": doc.name},
         fields=["file_name", "file_url"], limit_page_length=20)
+    meal_info = None
+    if doc.custom_construction_meal:
+        from hiru_construction.meals import checked_meal, summary
+        meal_info = summary(checked_meal(doc.custom_construction_meal))
     return {"name": doc.name, "modified": str(doc.modified), "docstatus": doc.docstatus,
         "project": doc.project, "supplier": doc.supplier_name, "amount": doc.grand_total,
         "currency": doc.currency, "date": str(doc.posting_date), "bill_no": doc.bill_no,
         "category": frappe.get_cached_value("Construction Cost Category", doc.custom_construction_category, "category_name"),
         "description": " / ".join(strip_html(row.description or row.item_name or "") for row in doc.items),
         "payment": frappe.get_cached_value("Account", doc.cash_bank_account, "account_name") if doc.is_paid else None,
+        "meal": doc.custom_construction_meal, "meal_info": meal_info,
         "vehicle": doc.custom_construction_vehicle, "machine": doc.custom_construction_machine,
         "litres": doc.custom_construction_litres, "meter": doc.custom_construction_meter if doc.custom_construction_meter_recorded else None,
         "files": files, "can_submit": bool(doc.has_permission("submit"))}

@@ -7,4 +7,8 @@ app_license = "Proprietary"
 required_apps = ["erpnext", "hrms"]
 after_install = "hiru_construction.setup.after_install"
 get_website_user_home_page = "hiru_construction.daily.home_page"
-doc_events = {"Purchase Invoice": {"validate": "hiru_construction.fuel.validate_invoice"}}
+notification_skip_email_types = ["Construction Meal Alert"]
+doc_events = {"Purchase Invoice": {
+    "validate": ["hiru_construction.fuel.validate_invoice", "hiru_construction.meals.validate_invoice"],
+    "on_submit": "hiru_construction.meals.invoice_changed", "on_cancel": "hiru_construction.meals.invoice_changed"},
+    "Project": {"validate": "hiru_construction.meals.validate_rates"}}

@@ -1,6 +1,6 @@
-# Construction ERP requirements — pilot baseline 0.2
+# Construction ERP requirements — pilot baseline 0.3
 
-**Status:** Baseline for a synthetic-data pilot, 2026-09-26. Business rules and payroll compliance still need validation before live use.
+**Status:** Updated with meals requirements, 2026-09-28. Business rules and payroll compliance still need validation before live use.
 
 ## Purpose and scope
 
@@ -32,15 +32,17 @@ The expected initial scale is 1–2 active projects, 10–20 workers, 4–6 vehi
 | R9 | Record daily attendance and, when pay or costing needs it, hours worked against a project. | The owner can enter present/absent/half-day status and hours for a worker, review the pay period, and trace variable wages to approved records. |
 | R10 | Track materials, tools, and subcontractors against projects. | The owner can see material receipts/issues and stock on hand, tool assignment/return, and subcontractor commitments and costs for a project. |
 | R11 | Allow a supervisor role later while keeping payroll and final financial approval with the owner. | A supervisor can enter draft site records and expenses; only permitted users can view payroll or approve/post costs. |
+| R12 | Include Meals in project budgets and expense categories. Track spending per meal and per person, compare with an expected cost per person, and notify the owner when it is exceeded. Suggest each day's headcount from project attendance and allow a manual adjustment for people who did not eat. | Meal expenses contribute once to project costs and the Meals category. A meal view shows attendance headcount, adjusted diners, total cost, actual cost per diner and expected cost. Multiple bills for the same meal are combined without counting diners twice. Over-limit meals are clearly flagged; missing attendance or a zero headcount never produces a misleading per-person figure. |
 
 ## Pilot defaults and calculations
 
-- **Starting cost categories:** Materials, Labour, Subcontractors, Machinery and equipment, Fuel, Transport, Site overhead, Permits and fees, and Other. These are editable global defaults. A project may add categories of its own. Contingency is a budget reserve, not an actual expense category.
+- **Starting cost categories:** Materials, Labour, Subcontractors, Machinery and equipment, Fuel, Meals, Transport, Site overhead, Permits and fees, and Other. These are editable global defaults. A project may add categories of its own. Contingency is a budget reserve, not an actual expense category.
 - **Budget versions:** Preserve the submitted tender as the original baseline. Show an approved revised budget separately and use it as the current budget if one exists. The owner approves revisions; the pilot does not silently rewrite the tender.
 - **Cost view:** Count an open purchase order's uninvoiced balance as a commitment. Count posted costs as actuals. Show available budget as current budget minus actuals minus open commitments. Show forecast final cost as actuals plus open commitments plus the owner's estimate of further uncommitted costs; show variance as current budget minus forecast. Warn on projected overruns, leaving a hard stop as a later decision.
 - **Shared costs:** Record them separately until the owner allocates them to a project; do not distribute them automatically. Capture ordinary cost sources, including supplier purchases, petty cash, wages, fuel, and subcontractors.
 - **Operations:** The owner enters and approves records initially. A future supervisor may enter draft costs, attendance, and progress for the owner to review. Allow a per-project work calendar with up to seven working days per week. Schedule each project using its own crew; cross-project worker sharing is outside this pilot.
 - **Resources:** Track odometer readings for vehicles. Record engine hours for machinery when the meter is available, and only then calculate litres per engine hour. Track materials as stock movements, tools as assigned/returned assets, and subcontractors as project-linked commitments and costs. Exact workflows will be tested in ERPNext.
+- **Meals:** Meals belong in the tender/current budget and actual expense reports. Record a meal against a project, date and meal type; combine its bills before calculating cost per head. Attendance provides a suggested headcount, not proof that everyone ate. Keep the attendance suggestion and manual adjustment visible, with a reason for adjustment. Preserve the expected-rate snapshot for historical comparisons. Provisional next-milestone defaults: separate breakfast/lunch/dinner limits per project and in-app alerts, subject to owner review.
 
 ### Example work-item entry
 
@@ -77,10 +79,12 @@ This is a capability map, not a final implementation choice. We will test standa
 2. **ERPNext pilot and application foundation — complete:** Install the custom Frappe app alongside ERPNext/HRMS, preserve development data, provide simple lifecycle commands, and validate a synthetic project with expenses, budgets, tasks, payroll, stock and a vehicle log. The first category-management forms are also available; category/account mapping and cost dashboards remain subsequent work.
 3. **Tender and cost plan — complete:** Submitted tender protection, controlled revisions, account/category validation and cancellation recovery.
 4. **Current project cost view — complete:** Category chart and report comparing submitted tender/current budget with actual expense postings and uninvoiced orders. Unmapped costs remain visible; possible receipt/accrual overlaps require reconciliation. See [calculation boundaries](cost-reporting.md).
-5. **Simplified daily work — complete:** Project overview and guided direct expense entry with private receipts, draft review and standard accounting postings. Payroll, attendance and fleet still need their simplified workflows. See the [daily work guide](daily-work.md).
+5. **Simplified daily work — complete:** Project overview and guided direct expense entry with private receipts, draft review and standard accounting postings. Attendance and fuel are extended in milestone 7. See the [daily work guide](daily-work.md).
 6. **Forecasts and trends:** Add separately maintained estimates of further uncommitted work, historical comparisons and receipt reconciliation automation.
 7. **Site attendance, categories and fuel — delivered for review:** Crew attendance/regular hours/OT, draft confirmation, category spending drilldown and equipment-linked fuel capture. Payroll/advance payments, fuel efficiency and trend reporting remain subsequent work.
 8. **Planning:** Add capacity-aware scheduling and reviewed natural-language work-item entry.
+9. **Meals budget and cost-per-head controls — delivered for review:** Meals category and budget integration; confirmed-attendance suggested diners, manually adjustable headcounts with reasons, expected costs per person, combined meal bills and in-app over-limit alerts. Historical attendance/rate snapshots and diner corrections are preserved. Current defaults use breakfast/lunch/dinner limits per project; the owner can review these defaults.
+10. **Simplified payroll and wage advances:** Owner-facing daily/weekly/monthly pay runs, OT rate configuration, wage advances and next-pay/instalment deductions, using the standard HRMS payroll records.
 
 Each completed milestone gets a separate local, Git-ignored numbered devlog and a Git commit for the corresponding repository changes. Future milestone scope and order may change after the pilot.
 

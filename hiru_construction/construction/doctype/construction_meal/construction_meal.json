@@ -1,0 +1,22 @@
+{
+ "doctype":"DocType", "name":"Construction Meal", "module":"Construction", "autoname":"hash",
+ "track_changes":1,"title_field":"meal_label",
+ "fields":[
+  {"fieldname":"meal_label","fieldtype":"Data","label":"Meal","read_only":1,"in_list_view":1},
+  {"fieldname":"project","fieldtype":"Link","options":"Project","label":"Project","reqd":1,"in_list_view":1},
+  {"fieldname":"meal_date","fieldtype":"Date","label":"Date","reqd":1,"in_list_view":1},
+  {"fieldname":"meal_type","fieldtype":"Select","label":"Meal Type","options":"Breakfast\nLunch\nDinner","reqd":1},
+  {"fieldname":"currency","fieldtype":"Link","options":"Currency","label":"Currency","read_only":1},
+  {"fieldname":"attendance_headcount","fieldtype":"Int","label":"Suggested Diners From Attendance","read_only":1},
+  {"fieldname":"diners","fieldtype":"Int","label":"Actual Diners","reqd":1},
+  {"fieldname":"adjustment_reason","fieldtype":"Small Text","label":"Headcount Adjustment Reason"},
+  {"fieldname":"expected_per_head","fieldtype":"Currency","options":"currency","label":"Expected Cost Per Person","reqd":1},
+  {"fieldname":"meal_key","fieldtype":"Data","label":"Meal Key","unique":1,"hidden":1,"read_only":1},
+  {"fieldname":"last_alert","fieldtype":"Data","label":"Last Alert State","hidden":1,"read_only":1},
+  {"fieldname":"over_limit","fieldtype":"Check","label":"Over Expected Cost","read_only":1,"in_list_view":1}
+ ],
+ "permissions":[
+  {"role":"System Manager","read":1,"write":1,"create":1,"delete":1,"report":1},
+  {"role":"Projects Manager","read":1,"write":1,"create":1,"report":1}
+ ],"sort_field":"meal_date","sort_order":"DESC"
+}

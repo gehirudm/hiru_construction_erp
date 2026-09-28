@@ -5,3 +5,4 @@ hiru_construction.setup
 hiru_construction.quick_expense_fields
 hiru_construction.daily_home
 hiru_construction.site_work_fields
+hiru_construction.meal_setup

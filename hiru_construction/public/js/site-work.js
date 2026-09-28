@@ -35,6 +35,7 @@
         if (token !== generation) return;
         sheet = { ...data, project: state.project }; renderCrew();
       } else if (view === 'categories') renderCategories();
+      else if (view === 'meals') { await window.hiruMeals.render(panel, () => token === generation); }
       else {
         const records = await fuel('history', { project: state.project });
         if (token !== generation) return;
@@ -175,7 +176,10 @@
       });
       if (data.has_more) body.append(node('p', 'Showing the latest 50 ledger entries. All entries are included in the totals.', 'muted'));
       const category = state.overview.categories.find(c => c.category === group.id);
-      if (category && state.overview.can_create) body.append(button('Add ' + group.label.toLowerCase() + ' expense', () => { $('work-dialog').close(); newExpense(category.account); }, 'primary'));
+      if (category && state.overview.can_create) body.append(button('Add ' + group.label.toLowerCase() + ' expense', () => {
+        $('work-dialog').close();
+        if (category.entry_type === 'Meals') { view = 'meals'; showView(); } else newExpense(category.account);
+      }, 'primary'));
     } catch (error) { modalError(body, error); }
   }
   function renderFuel(records) {

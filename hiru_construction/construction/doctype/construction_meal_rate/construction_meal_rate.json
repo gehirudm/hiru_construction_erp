@@ -1,0 +1,7 @@
+{
+ "doctype":"DocType", "name":"Construction Meal Rate", "module":"Construction", "istable":1,
+ "fields":[
+  {"fieldname":"meal_type","fieldtype":"Select","label":"Meal","options":"Breakfast\nLunch\nDinner","reqd":1,"in_list_view":1},
+  {"fieldname":"expected_per_head","fieldtype":"Currency","label":"Expected Cost Per Person","reqd":1,"in_list_view":1}
+ ]
+}

@@ -115,12 +115,15 @@
     if (state.snapshot && !state.expense && !confirm('Saving has not been confirmed. Closing now may leave a saved draft. Check recent expenses before entering it again. Close?')) return;
     $('expense-dialog').close(); refresh();
   }
-  async function newExpense(account) {
+  async function newExpense(account, meal) {
     state.requestId = crypto.randomUUID(); state.snapshot = null; state.receipt = null; state.expense = null; state.uploadPending = false;
     $('expense-form').reset(); $('expense-form').querySelectorAll('input, select, button').forEach(el => el.disabled = false);
+    options($('supplier'), [], 'Loading suppliers…');
     $('expense-form').hidden = false; $('review').hidden = true; $('expense-error').hidden = true;
     $('paid-from-label').hidden = true; $('paid-from').required = false;
     $('expense-date').value = state.today; $('expense-date').max = state.today;
+    state.meal = meal || null;
+    if (meal) { $('expense-date').value = meal.date; $('description').value = meal.type + ' for ' + meal.diners + ' diners'; }
     $('amount-label').textContent = 'Total amount (' + state.overview.currency + ')';
     const counts = {};
     state.overview.categories.forEach(row => counts[row.label] = (counts[row.label] || 0) + 1);
@@ -151,6 +154,12 @@
         ['Meter reading', data.meter === null ? 'Not recorded' : data.meter + (data.vehicle ? ' km' : ' engine hours')]].forEach(([label, value]) => {
         const row = node('div'); row.append(node('dt', label), node('dd', value)); $('review-details').append(row);
       });
+    }
+    if (data.meal_info) {
+      const meal = data.meal_info, total = meal.total + (data.docstatus === 0 ? data.amount : 0);
+      const row = node('div'); row.append(node('dt', data.docstatus === 0 ? 'After posting' : 'Meal cost'),
+        node('dd', `${money(total / meal.diners)} per person · ${meal.diners} diners · Expected ${money(meal.expected)}${total > meal.diners * meal.expected ? ' — OVER EXPECTED COST' : ''}`));
+      if (total > meal.diners * meal.expected) row.className = 'alert error'; $('review-details').append(row);
     }
     $('receipt-links').replaceChildren();
     data.files.forEach(file => {
@@ -183,6 +192,7 @@
       state.snapshot = { request_id: state.requestId, project: state.project, account: $('category').value,
         description: $('description').value, supplier: $('supplier').value, amount: $('amount').value,
         date: $('expense-date').value, paid_from: $('payment').value === 'paid' ? $('paid-from').value : '', bill_no: $('bill-no').value };
+      if (state.meal && state.overview.categories.find(c => c.account === $('category').value)?.entry_type === 'Meals') state.snapshot.meal = state.meal.name;
       if (!$('fuel-fields').hidden) Object.assign(state.snapshot, {
         vehicle: $('fuel-kind').value === 'vehicle' ? $('fuel-equipment').value : '',
         machine: $('fuel-kind').value === 'machine' ? $('fuel-equipment').value : '',

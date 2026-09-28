@@ -12,7 +12,7 @@ make sleep   # also stop the dedicated Colima VM to free memory
 
 Open http://localhost:8080. Login: `Administrator`; password: `PILOT_ADMIN_PASSWORD` in local `.env`. Demo data is optional: `make seed`, then `make verify`.
 
-The simplified [Daily work screen](http://localhost:8080/construction) includes a crew attendance/OT sheet, expense category cards with spending details, and vehicle/machinery-linked fuel entry. Record costs with private receipts and review before posting. See the [daily work guide](docs/daily-work.md). Payroll and project setup still use the advanced workspace.
+The simplified [Daily work screen](http://localhost:8080/construction) includes attendance/OT, category spending, equipment-linked fuel, and meals with adjustable attendance-based headcounts and cost-per-person alerts. Record costs with private receipts and review before posting. See the [daily work guide](docs/daily-work.md). Payroll and project setup still use the advanced workspace.
 
 Use **Hiru Construction → Construction Project Costs** for the category chart and tender/budget/expense/order comparison. [Cost reporting guide](docs/cost-reporting.md) explains approval, revisions, and calculation boundaries. `make test` runs automated checks on a separate test site; it never runs them against the demo company.
 

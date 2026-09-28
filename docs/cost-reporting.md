@@ -28,7 +28,7 @@ The report is restricted to System Managers and Projects Managers, checks projec
 
 ## Local verification
 
-Start with `make start`. `make seed` installs the optional demo tender and transactions; `make verify` checks the ledger and report totals. For the sample, budget is LKR 375,000, actuals LKR 132,000, open orders LKR 60,000 and remaining budget LKR 183,000.
+Start with `make start`. `make seed` installs the optional demo tender and transactions; `make verify` checks the ledger and report totals. The original tender is LKR 375,000. A Meals revision adds LKR 30,000, so the current sample budget is LKR 405,000, actuals LKR 132,000, open orders LKR 60,000 and remaining budget LKR 213,000.
 
 `make test` creates/reuses **hiru-test.localhost**, marked exclusively for tests, on the local database service. It installs the same apps and uses its own company and fixtures. Tests refuse to run on the demo site. The test site's email and scheduler are disabled. Its database persists in the existing development volumes and is separate from **hiru.localhost**. Run `npm run test:browser` against the seeded demo to verify navigation, chart rendering, report totals and revision creation; that check opens an unsaved revision and does not submit one.
 

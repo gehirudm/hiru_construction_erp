@@ -33,4 +33,20 @@ def prepare():
     if not frappe.db.exists("Vehicle", "UI-SITE-TRUCK"):
         frappe.get_doc({"doctype": "Vehicle", "license_plate": "UI-SITE-TRUCK", "make": "Test", "model": "Truck",
             "last_odometer": 100, "fuel_type": "Diesel", "uom": "Litre", "company": company.name}).insert()
+    if not frappe.db.exists("Project", "UI-MEALS-PROJECT"):
+        frappe.get_doc({"doctype": "Project", "project_name": "Meals workflow test", "company": company.name,
+            "cost_center": company.cost_center}).insert(set_name="UI-MEALS-PROJECT")
+        category = frappe.db.get_value("Construction Cost Category", {"category_name": "Meals", "scope": "Global"}, "name")
+        frappe.get_doc({"doctype": "Construction Cost Plan", "plan_name": "UI-MEALS-BUDGET",
+            "project": "UI-MEALS-PROJECT", "version_kind": "Tender baseline", "items": [{"category": category,
+                "account": company.default_expense_account, "original_estimate": 20000}]}).insert().submit()
+    for number in (1, 2):
+        employee = "UI-MEAL-WORKER-" + str(number)
+        if not frappe.db.exists("Employee", employee):
+            frappe.get_doc({"doctype": "Employee", "first_name": "UI Meal Worker " + str(number), "gender": "Male",
+                "date_of_birth": "1990-01-01", "date_of_joining": add_days(nowdate(), -30), "company": company.name,
+                "status": "Active", "custom_construction_project": "UI-MEALS-PROJECT"}).insert(set_name=employee)
+        if not frappe.db.exists("Attendance", {"employee": employee, "attendance_date": nowdate(), "docstatus": 1}):
+            frappe.get_doc({"doctype": "Attendance", "employee": employee, "attendance_date": nowdate(),
+                "company": company.name, "status": "Present", "custom_construction_project": "UI-MEALS-PROJECT"}).insert().submit()
     frappe.db.commit()

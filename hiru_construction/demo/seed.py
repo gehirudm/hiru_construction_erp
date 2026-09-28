@@ -11,7 +11,7 @@ PROJECT = "PILOT-PROJECT-001"
 DATE = "2026-09-21"
 CATEGORIES = [
     "Materials", "Labour", "Subcontractors", "Machinery and equipment", "Fuel",
-    "Transport", "Site overhead", "Permits and fees", "Other",
+    "Meals", "Transport", "Site overhead", "Permits and fees", "Other",
 ]
 
 
@@ -276,6 +276,27 @@ def setup_fuel(company):
     ensure("Expense Claim", "PILOT-FUEL-CLAIM-001", {}, submit=True)
 
 
+def setup_meals(company):
+    from hiru_construction.daily import plan_for
+    project = frappe.get_doc("Project", PROJECT)
+    if not project.custom_construction_meal_rates:
+        for meal_type, rate in (("Breakfast", 200), ("Lunch", 350), ("Dinner", 300)):
+            project.append("custom_construction_meal_rates", {"meal_type": meal_type, "expected_per_head": rate})
+        project.save()
+    current = plan_for(PROJECT)
+    if any(row.account == account("Meals") for row in current.items):
+        return
+    if frappe.db.exists("Construction Cost Plan", "PILOT-MEALS-BUDGET-001"):
+        raise ValueError("The sample Meals revision is no longer active; review the project budget before reseeding")
+    items = [{"category": row.category, "account": row.account, "original_estimate": row.original_estimate,
+        "approved_revision": row.approved_revision if current.version_kind == "Approved revision" else row.original_estimate,
+        "contingency": row.contingency} for row in current.items]
+    items.append({"category": frappe.db.get_value("Construction Cost Category", {"category_name": "Meals", "scope": "Global"}, "name"),
+        "account": account("Meals"), "original_estimate": 0, "approved_revision": 30000})
+    ensure("Construction Cost Plan", "PILOT-MEALS-BUDGET-001", {"plan_name": "PILOT-MEALS-BUDGET-001",
+        "project": PROJECT, "version_kind": "Approved revision", "baseline": "PILOT-TENDER-001", "items": items}, submit=True)
+
+
 def setup_workspace():
     if frappe.get_meta("User").has_field("default_workspace"):
         frappe.db.set_value("User", "Administrator", "default_workspace", None)
@@ -289,7 +310,7 @@ def main():
     if frappe.get_all("Company", filters={"name": ["!=", COMPANY]}, limit=1):
         raise RuntimeError("Refusing to seed alongside other companies")
     company = setup_company()
-    for fn in [setup_project, setup_purchase, setup_people, setup_materials, setup_fuel, setup_cost_plan]:
+    for fn in [setup_project, setup_purchase, setup_people, setup_materials, setup_fuel, setup_cost_plan, setup_meals]:
         fn(company)
         frappe.db.commit()
         print(f"Completed {fn.__name__}")
