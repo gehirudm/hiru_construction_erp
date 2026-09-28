@@ -54,7 +54,8 @@ def category_options(project):
                 and account.company == project.company and account.root_type == "Expense"
                 and not account.disabled and not account.is_group):
             options.append({"account": row.account, "category": row.category,
-                "label": category.category_name, "detail": account.account_name})
+                "label": category.category_name, "detail": account.account_name,
+                "entry_type": category.entry_type or "General", "scope": category.scope})
     return options
 
 
@@ -85,7 +86,8 @@ def overview(project):
         fields=["name", "account_name"], limit_page_length=100) if frappe.has_permission("Account", "read") else []
     grouped = {}
     for row in rows:
-        entry = grouped.setdefault(row["category"], {"label": row["category"], "budget": 0,
+        category_id = next((item.category for item in plan.items if item.account == row["account"]), None)
+        entry = grouped.setdefault(category_id, {"id": category_id, "label": row["category"], "budget": 0,
             "spent": 0, "orders": 0, "review_receipts": False})
         entry["budget"] += row["current_budget"]
         entry["spent"] += row["actual"]
@@ -136,7 +138,8 @@ def canonical(payload):
     except (InvalidOperation, ValueError, TypeError):
         frappe.throw(_("Enter a positive amount with at most two decimal places and retry."))
     data = {field: str(payload.get(field) or "").strip() for field in
-        ("project", "account", "supplier", "description", "date", "paid_from", "bill_no")}
+        ("project", "account", "supplier", "description", "date", "paid_from", "bill_no",
+         "vehicle", "machine", "litres", "meter")}
     if not all(data[f] for f in ("project", "account", "supplier", "description", "date")):
         frappe.throw(_("Choose a project, category and supplier, then enter a date and description."))
     if len(data["description"]) > 500 or len(data["bill_no"]) > 140:
@@ -173,6 +176,11 @@ def save_expense(payload):
     mapping = next((row for row in category_options(project) if row["account"] == data["account"]), None)
     if not mapping:
         frappe.throw(_("This category is not available in the current project budget. Refresh and choose again."))
+    if mapping["entry_type"] == "Fuel":
+        from hiru_construction.fuel import number
+        number(data["litres"], positive=True)
+        if data["vehicle"] or data["meter"]:
+            number(data["meter"])
     supplier = frappe.get_doc("Supplier", data["supplier"])
     supplier.check_permission("read")
     if supplier.disabled:
@@ -191,8 +199,12 @@ def save_expense(payload):
         "disable_rounded_total": 1,
         "project": project.name, "posting_date": data["date"], "set_posting_time": 1,
         "due_date": data["date"], "bill_date": data["date"], "bill_no": data["bill_no"],
+        "remarks": data["description"],
         "custom_construction_entry_id": request_id, "custom_construction_request_hash": digest,
         "custom_construction_category": mapping["category"],
+        "custom_construction_vehicle": data["vehicle"], "custom_construction_machine": data["machine"],
+        "custom_construction_litres": data["litres"] or 0, "custom_construction_meter": data["meter"] or 0,
+        "custom_construction_meter_recorded": bool(data["meter"]),
         "is_paid": bool(data["paid_from"]), "cash_bank_account": data["paid_from"],
         "paid_amount": amount if data["paid_from"] else 0,
         "items": [{"item_name": data["description"][:140], "description": escape_html(data["description"]),
@@ -228,6 +240,8 @@ def expense(name):
         "category": frappe.get_cached_value("Construction Cost Category", doc.custom_construction_category, "category_name"),
         "description": " / ".join(strip_html(row.description or row.item_name or "") for row in doc.items),
         "payment": frappe.get_cached_value("Account", doc.cash_bank_account, "account_name") if doc.is_paid else None,
+        "vehicle": doc.custom_construction_vehicle, "machine": doc.custom_construction_machine,
+        "litres": doc.custom_construction_litres, "meter": doc.custom_construction_meter if doc.custom_construction_meter_recorded else None,
         "files": files, "can_submit": bool(doc.has_permission("submit"))}
 
 

@@ -2,6 +2,8 @@
 
 The daily interface uses Frappe website routes in `hiru_construction/www/`, versioned assets in `public/`, and permission-checked methods in `daily.py`. Guided expenses create standard Purchase Invoices; custom fields store a unique retry identifier, request hash and category. No separate expense ledger is introduced. The optional test frontend serves only the isolated test site for `make test-ui`.
 
+`site_work.py` manages project crew assignment and draft/confirmed HRMS Attendance. Regular hours supplement native total working hours and actual overtime duration. Employee locks serialize daily marks and normal permissions apply. `fuel.py` validates equipment-linked fuel fields on Purchase Invoice; equipment locks and submit-time validation prevent stale readings from posting. Company Vehicle/Asset records supply equipment identity. Fuel does not create a second claim or vehicle-log accounting path. Versioned extensions are installed by `site_work_fields.py`; the cost-category DocType selects General or Fuel entry.
+
 `hiru_construction` is a normal, installable Frappe application, alongside unmodified `frappe`, `erpnext`, and `hrms` apps. The repository is the app source root, not a bench directory or an ERPNext fork.
 
 | Path | Responsibility |

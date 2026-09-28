@@ -13,6 +13,8 @@ def after_install():
         if not frappe.db.exists("Construction Cost Category", {"category_name": label, "scope": "Global"}):
             frappe.get_doc({"doctype": "Construction Cost Category", "category_name": label,
                             "scope": "Global"}).insert(ignore_permissions=True)
+    from hiru_construction.site_work_fields import execute as site_work_fields
+    site_work_fields()
 
 
 def execute():

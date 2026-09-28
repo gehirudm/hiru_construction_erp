@@ -173,7 +173,11 @@ def setup_people(company):
             "company": COMPANY, "status": "Active",
             "holiday_list": "PILOT Seven Day Calendar",
             "payroll_cost_center": company.cost_center,
+            "custom_construction_project": PROJECT,
         })
+        if not employee.custom_construction_project:
+            employee.custom_construction_project = PROJECT
+            employee.save()
         ensure("Attendance", f"PILOT-ATT-{i:03}", {
             "employee": employee.name, "company": COMPANY,
             "attendance_date": DATE, "status": "Present",
@@ -239,10 +243,13 @@ def setup_materials(company):
 def setup_fuel(company):
     from hrms.hr.doctype.vehicle_log.vehicle_log import make_expense_claim
 
-    ensure("Vehicle", "PILOT-TRUCK-01", {
+    vehicle = ensure("Vehicle", "PILOT-TRUCK-01", {
         "license_plate": "PILOT-TRUCK-01", "make": "Demo", "model": "Truck",
-        "last_odometer": 10000, "fuel_type": "Diesel", "uom": "Litre",
+        "last_odometer": 10000, "fuel_type": "Diesel", "uom": "Litre", "company": COMPANY,
     })
+    if not vehicle.company:
+        vehicle.company = COMPANY
+        vehicle.save()
     log = ensure("Vehicle Log", "PILOT-FUEL-001", {
         "license_plate": "PILOT-TRUCK-01", "employee": "PILOT-EMP-001",
         "date": DATE, "last_odometer": 10000, "odometer": 10300,

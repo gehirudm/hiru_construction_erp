@@ -13,4 +13,6 @@ def prepare():
             country="Sri Lanka", currency="LKR", chart_of_accounts="Standard",
             fy_start_date=f"{year}-01-01", fy_end_date=f"{year}-12-31",
             domain="Services", bank_account="Test Bank"))
+    if not frappe.db.exists("Gender", "Male"):
+        frappe.get_doc({"doctype": "Gender", "gender": "Male"}).insert()
     frappe.db.commit()

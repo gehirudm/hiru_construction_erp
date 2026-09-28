@@ -36,6 +36,12 @@ async function main() {
     await page.waitForFunction(() => document.querySelector('#spent').textContent.includes('132,000'));
     fs.mkdirSync('.local/screenshots', { recursive: true });
     await page.screenshot({ path: '.local/screenshots/daily-demo.png', fullPage: true });
+    await page.getByRole('button', { name: 'Attendance & OT', exact: true }).click();
+    await page.waitForFunction(() => document.querySelectorAll('.crew-row').length === 3);
+    await page.screenshot({ path: '.local/screenshots/crew-demo.png', fullPage: true });
+    await page.getByRole('button', { name: 'Expense categories', exact: true }).click();
+    await page.waitForFunction(() => document.querySelectorAll('.category-card').length === 4);
+    await page.screenshot({ path: '.local/screenshots/categories-demo.png', fullPage: true });
     await page.goto(base + '/desk/hiru-construction');
     await page.getByText('Construction Cost Category', { exact: true }).first().waitFor();
     fs.mkdirSync('.local/screenshots', { recursive: true });

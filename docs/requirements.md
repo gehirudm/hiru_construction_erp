@@ -79,7 +79,7 @@ This is a capability map, not a final implementation choice. We will test standa
 4. **Current project cost view — complete:** Category chart and report comparing submitted tender/current budget with actual expense postings and uninvoiced orders. Unmapped costs remain visible; possible receipt/accrual overlaps require reconciliation. See [calculation boundaries](cost-reporting.md).
 5. **Simplified daily work — complete:** Project overview and guided direct expense entry with private receipts, draft review and standard accounting postings. Payroll, attendance and fleet still need their simplified workflows. See the [daily work guide](daily-work.md).
 6. **Forecasts and trends:** Add separately maintained estimates of further uncommitted work, historical comparisons and receipt reconciliation automation.
-7. **People and fleet:** Configure payroll/advances and fuel capture with project allocation and useful reports.
+7. **Site attendance, categories and fuel — delivered for review:** Crew attendance/regular hours/OT, draft confirmation, category spending drilldown and equipment-linked fuel capture. Payroll/advance payments, fuel efficiency and trend reporting remain subsequent work.
 8. **Planning:** Add capacity-aware scheduling and reviewed natural-language work-item entry.
 
 Each completed milestone gets a separate local, Git-ignored numbered devlog and a Git commit for the corresponding repository changes. Future milestone scope and order may change after the pilot.

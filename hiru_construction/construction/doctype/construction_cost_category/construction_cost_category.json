@@ -16,9 +16,11 @@
     "project",
     "disabled",
     "description",
+    "entry_type",
     "scope_key"
   ],
   "fields": [
+    {"fieldname": "entry_type", "label": "Expense Entry Type", "fieldtype": "Select", "options": "General\nFuel", "default": "General", "reqd": 1},
     {
       "fieldname": "category_name",
       "label": "Category Name",

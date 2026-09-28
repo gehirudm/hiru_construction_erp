@@ -19,7 +19,7 @@
     return new DOMParser().parseFromString(String(text), 'text/html').body.textContent;
   }
   async function api(method, args = {}, post = false) {
-    const url = new URL('/api/method/hiru_construction.daily.' + method, location.origin);
+    const url = new URL('/api/method/' + (method.includes('.') ? method : 'hiru_construction.daily.' + method), location.origin);
     const init = { credentials: 'same-origin', headers: { 'X-Frappe-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content } };
     if (post) {
       init.method = 'POST'; init.headers['Content-Type'] = 'application/json'; init.body = JSON.stringify(args);
@@ -94,6 +94,7 @@
         row.addEventListener('click', () => openReview(expense.name)); $('recent').append(row);
       });
       $('content').hidden = false;
+      document.dispatchEvent(new CustomEvent('hiru:project-ready'));
     } catch (error) { if (generation === state.generation) showError('page-error', error); }
     finally { if (generation === state.generation) $('loading').hidden = true; }
   }
@@ -114,7 +115,7 @@
     if (state.snapshot && !state.expense && !confirm('Saving has not been confirmed. Closing now may leave a saved draft. Check recent expenses before entering it again. Close?')) return;
     $('expense-dialog').close(); refresh();
   }
-  async function newExpense() {
+  async function newExpense(account) {
     state.requestId = crypto.randomUUID(); state.snapshot = null; state.receipt = null; state.expense = null; state.uploadPending = false;
     $('expense-form').reset(); $('expense-form').querySelectorAll('input, select, button').forEach(el => el.disabled = false);
     $('expense-form').hidden = false; $('review').hidden = true; $('expense-error').hidden = true;
@@ -124,6 +125,10 @@
     const counts = {};
     state.overview.categories.forEach(row => counts[row.label] = (counts[row.label] || 0) + 1);
     options($('category'), state.overview.categories.map(row => [row.account, row.label + (counts[row.label] > 1 ? ' · ' + row.detail : '')]), 'Choose category');
+    if (typeof account === 'string') $('category').value = account;
+    $('fuel-fields').hidden = true;
+    ['fuel-equipment', 'fuel-litres', 'fuel-meter'].forEach(id => $(id).required = false);
+    document.dispatchEvent(new CustomEvent('hiru:expense-open'));
     options($('paid-from'), state.overview.payment_accounts.map(row => [row.name, row.account_name]), 'Choose cash or bank');
     $('add-supplier').hidden = !state.overview.can_add_supplier;
     $('expense-title').textContent = 'Record an expense'; $('save-draft').textContent = 'Save draft & review';
@@ -141,6 +146,12 @@
       ['Receipt no.', data.bill_no || 'Not provided']].forEach(([label, value]) => {
       const row = node('div'); row.append(node('dt', label), node('dd', value || '—')); $('review-details').append(row);
     });
+    if (data.vehicle || data.machine) {
+      [['Equipment', data.vehicle || data.machine], ['Fuel', data.litres + ' litres'],
+        ['Meter reading', data.meter === null ? 'Not recorded' : data.meter + (data.vehicle ? ' km' : ' engine hours')]].forEach(([label, value]) => {
+        const row = node('div'); row.append(node('dt', label), node('dd', value)); $('review-details').append(row);
+      });
+    }
     $('receipt-links').replaceChildren();
     data.files.forEach(file => {
       if (!/^\/(private\/)?files\//.test(file.file_url)) return;
@@ -172,6 +183,10 @@
       state.snapshot = { request_id: state.requestId, project: state.project, account: $('category').value,
         description: $('description').value, supplier: $('supplier').value, amount: $('amount').value,
         date: $('expense-date').value, paid_from: $('payment').value === 'paid' ? $('paid-from').value : '', bill_no: $('bill-no').value };
+      if (!$('fuel-fields').hidden) Object.assign(state.snapshot, {
+        vehicle: $('fuel-kind').value === 'vehicle' ? $('fuel-equipment').value : '',
+        machine: $('fuel-kind').value === 'machine' ? $('fuel-equipment').value : '',
+        litres: $('fuel-litres').value, meter: $('fuel-meter').value });
     }
     setBusy(true); $('save-draft').textContent = 'Saving…';
     $('expense-form').querySelectorAll('input, select, #add-supplier').forEach(el => el.disabled = true);
@@ -241,6 +256,7 @@
       if (!response.ok) throw new Error('Sign out failed. Please retry.'); location.assign('/login');
     } catch (error) { showError('page-error', error); }
   });
+  window.hiruDaily = { $, state, node, api, money, dateLabel, options, showError, refresh, newExpense };
   (async () => {
     try {
       const result = await api('projects'); state.today = result.today;

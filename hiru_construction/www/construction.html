@@ -7,6 +7,8 @@
   <title>Daily work · Hiru Construction</title>
   <link rel="stylesheet" href="/assets/hiru_construction/css/daily.css?v={{ asset_version }}">
   <script defer src="/assets/hiru_construction/js/daily.js?v={{ asset_version }}"></script>
+  <link rel="stylesheet" href="/assets/hiru_construction/css/site-work.css?v={{ asset_version }}">
+  <script defer src="/assets/hiru_construction/js/site-work.js?v={{ asset_version }}"></script>
 </head>
 <body>
   <a class="skip" href="#main">Skip to daily work</a>
@@ -19,6 +21,8 @@
     <div id="notice" class="notice" role="status" hidden></div>
     <div id="page-error" class="alert error" role="alert" hidden></div>
     <div class="project-bar"><label for="project">Project<select id="project" disabled><option>Loading projects…</option></select></label><button class="secondary" id="refresh" disabled>Refresh</button><button class="primary" id="new-expense" disabled>＋ Record expense</button></div>
+    <nav class="work-tabs" aria-label="Daily work views"><button data-view="overview" aria-pressed="true">Overview</button><button data-view="crew" aria-pressed="false">Attendance & OT</button><button data-view="categories" aria-pressed="false">Expense categories</button><button data-view="fuel" aria-pressed="false">Fuel & equipment</button></nav>
+    <div id="work-panel" hidden></div>
     <div id="loading" class="empty" role="status">Loading your projects…</div>
     <div id="content" hidden>
       <div class="project-heading"><h2 id="project-title"></h2><span class="pill">Project overview</span></div>
@@ -36,7 +40,7 @@
       </div>
       <section class="panel expenses-panel"><div class="panel-heading"><div><h2>Recent daily expenses</h2><p class="muted">Drafts are waiting for review and are not included in recorded costs.</p></div></div><div id="recent"></div></section>
     </div>
-    <footer>Hiru Construction · Daily work <span>Project setup, payroll and other workflows are in the advanced workspace for now.</span></footer>
+    <footer>Hiru Construction · Daily work <span>Payroll and project setup are in the advanced workspace.</span></footer>
   </main>
   <dialog id="expense-dialog" aria-labelledby="expense-title">
     <div class="dialog-heading"><div><p class="eyebrow">EXPENSE ENTRY</p><h2 id="expense-title">Record an expense</h2></div><button class="icon-button" id="close-expense" aria-label="Close expense">✕</button></div>
@@ -45,6 +49,13 @@
       <p class="muted">For a direct project expense. Stock purchases, purchase orders, payroll and tax breakdowns need <a href="/desk/purchase-invoice/new-purchase-invoice" target="_blank" rel="noopener">advanced entry</a>.</p>
       <div class="form-grid">
         <label class="full">Category<select id="category" required></select></label>
+        <div class="full fuel-fields" id="fuel-fields" hidden>
+          <p class="muted">Fuel is linked to this equipment and counted once in project costs.</p>
+          <label>Equipment type<select id="fuel-kind"><option value="vehicle">Vehicle</option><option value="machine">Machinery</option></select></label>
+          <label>Vehicle or machine<select id="fuel-equipment"></select></label>
+          <div class="form-grid"><label>Litres<input id="fuel-litres" type="number" min="0.001" max="999999999" step="0.001" inputmode="decimal"></label><label><span id="fuel-meter-label">Odometer (km)</span><input id="fuel-meter" type="number" min="0" max="999999999" step="0.001" inputmode="decimal"></label></div>
+          <p class="muted" id="fuel-rate"></p>
+        </div>
         <label class="full">What was it for?<input id="description" maxlength="500" required placeholder="e.g. Sand delivery to site"></label>
         <div class="full"><label for="supplier-search">Find supplier<input id="supplier-search" type="search" placeholder="Search supplier names" autocomplete="off"></label><div class="supplier-row"><label for="supplier">Supplier<select id="supplier" required></select></label><button type="button" class="secondary" id="add-supplier">Add supplier</button></div></div>
         <label><span id="amount-label">Total amount</span><input id="amount" type="number" min="0.01" max="99999999999.99" step="0.01" inputmode="decimal" required></label>
@@ -63,5 +74,6 @@
     </section>
   </dialog>
   <dialog id="supplier-dialog" aria-labelledby="supplier-title"><form id="supplier-form"><h2 id="supplier-title">Add a supplier</h2><p class="muted">Use the name shown on the bill or receipt.</p><label>Supplier name<input id="supplier-name" maxlength="140" required></label><p id="supplier-error" class="alert error" role="alert" hidden></p><div class="dialog-actions"><button class="secondary" type="button" id="cancel-supplier">Cancel</button><button class="primary" type="submit" id="save-supplier">Add supplier</button></div></form></dialog>
+  <dialog id="work-dialog" aria-labelledby="work-dialog-title"><div class="dialog-heading"><h2 id="work-dialog-title"></h2><button class="icon-button" id="close-work-dialog" aria-label="Close details">✕</button></div><div id="work-dialog-body"></div></dialog>
 </body>
 </html>

@@ -12,7 +12,7 @@ async function main() {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1100 } });
   const page = await context.newPage();
   page.setDefaultTimeout(20000);
-  let invoice, receipt, csrf;
+  let invoice, receipt, csrf, fuelInvoice, attendanceName;
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   async function call(method, args) {
@@ -70,9 +70,63 @@ async function main() {
     assert.equal(after.spent, before.spent + 123.45);
     await page.getByRole('button').filter({ hasText: invoice }).click();
     await page.getByRole('heading', { name: 'Expense recorded', exact: true }).waitFor();
+    await page.getByRole('button', { name: 'Done', exact: true }).click();
+    await page.selectOption('#project', 'UI-SITE-PROJECT');
+    await page.waitForFunction(() => document.querySelector('#project-title').textContent === 'Site workflow test');
+    await page.getByRole('button', { name: 'Attendance & OT', exact: true }).click();
+    await page.locator('.crew-row').waitFor();
+    await page.getByRole('button', { name: 'Mark all present', exact: true }).click();
+    await page.locator('[data-ot]').fill('2');
+    await page.screenshot({ path: '.local/screenshots/crew-mobile.png', fullPage: true });
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+    await page.getByRole('button', { name: 'Save attendance draft', exact: true }).click();
+    await page.getByText('1 workers saved as drafts.', { exact: true }).waitFor();
+    const crew = await call('hiru_construction.site_work.crew', { project: 'UI-SITE-PROJECT' });
+    attendanceName = crew.employees[0].attendance.name;
+    assert.equal(crew.employees[0].attendance.docstatus, 0);
+    await page.getByRole('button', { name: 'Done', exact: true }).click();
+    await page.getByRole('button', { name: 'Review & confirm attendance', exact: true }).click();
+    await page.getByRole('button', { name: 'Confirm this attendance', exact: true }).click();
+    await page.getByText('1 workers confirmed.', { exact: true }).waitFor();
+    assert.equal((await call('hiru_construction.site_work.crew', { project: 'UI-SITE-PROJECT' })).ot_total, 2);
+    await page.getByRole('button', { name: 'Done', exact: true }).click();
+    await page.getByRole('button', { name: 'Expense categories', exact: true }).click();
+    await page.locator('.category-card').click();
+    await page.getByRole('button', { name: 'Add fuel expense', exact: true }).click();
+    await page.selectOption('#fuel-equipment', 'UI-SITE-TRUCK');
+    await page.fill('#fuel-litres', '10');
+    await page.fill('#fuel-meter', '120');
+    await page.selectOption('#supplier', { label: 'Daily UI Supplier' });
+    await page.fill('#amount', '3000.25');
+    await page.screenshot({ path: '.local/screenshots/fuel-mobile.png', fullPage: true });
+    const fuelSaved = page.waitForResponse(r => r.url().endsWith('daily.save_expense'));
+    await page.getByRole('button', { name: 'Save draft & review' }).click();
+    const fuelData = await (await fuelSaved).json();
+    assert.ok(fuelData.message?.name, JSON.stringify(fuelData)); fuelInvoice = fuelData.message.name;
+    assert.equal(fuelData.message.vehicle, 'UI-SITE-TRUCK');
+    assert.equal(fuelData.message.litres, 10);
+    await page.getByRole('button', { name: 'Confirm & record expense' }).click();
+    await page.getByRole('heading', { name: 'Expense recorded', exact: true }).waitFor();
+    await page.getByRole('button', { name: 'Done', exact: true }).click();
+    await page.getByRole('button', { name: 'Fuel & equipment', exact: true }).click();
+    await page.locator('#work-panel').getByText('UI-SITE-TRUCK', { exact: true }).waitFor();
+    await page.getByRole('button', { name: 'Expense categories', exact: true }).click();
+    await page.locator('.category-card').click();
+    await page.getByText(/Spent LKR\s*3,000.25/).waitFor();
+    await page.screenshot({ path: '.local/screenshots/category-detail-mobile.png', fullPage: true });
     assert.deepEqual(errors, [], 'JavaScript errors');
-    console.log('PASS: daily home, mobile layout, private receipt, draft review, posting, totals and reopening.');
+    console.log('PASS: daily home, mobile layouts, private receipts, expenses, crew attendance/OT, linked fuel and category drilldown.');
   } finally {
+    if (attendanceName && csrf) {
+      const doc = await call('frappe.client.get', { doctype: 'Attendance', name: attendanceName });
+      if (doc.docstatus === 1) await call('frappe.client.cancel', { doctype: 'Attendance', name: attendanceName });
+      else if (doc.docstatus === 0) await call('frappe.client.delete', { doctype: 'Attendance', name: attendanceName });
+    }
+    if (fuelInvoice && csrf) {
+      const doc = await call('hiru_construction.daily.expense', { name: fuelInvoice });
+      if (doc.docstatus === 1) await call('frappe.client.cancel', { doctype: 'Purchase Invoice', name: fuelInvoice });
+      else if (doc.docstatus === 0) await call('frappe.client.delete', { doctype: 'Purchase Invoice', name: fuelInvoice });
+    }
     if (invoice && csrf) {
       const doc = await call('hiru_construction.daily.expense', { name: invoice });
       if (doc.docstatus === 1) await call('frappe.client.cancel', { doctype: 'Purchase Invoice', name: invoice });

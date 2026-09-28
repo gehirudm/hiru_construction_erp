@@ -14,7 +14,7 @@ class TestDailyWork(IntegrationTestCase):
             raise RuntimeError("Use make test on the isolated site")
         super().setUpClass()
         cls.company = frappe.get_doc("Company", "Cost Controls Test")
-        cls.category = frappe.get_all("Construction Cost Category", filters={"scope": "Global"}, pluck="name")[0]
+        cls.category = frappe.get_all("Construction Cost Category", filters={"scope": "Global", "category_name": "Transport"}, pluck="name")[0]
         cls.supplier = frappe.get_doc({"doctype": "Supplier", "supplier_name": "Daily Supplier",
             "supplier_group": "All Supplier Groups", "supplier_type": "Company"}).insert().name
         cls.cash = frappe.get_all("Account", filters={"company": cls.company.name,
