@@ -46,8 +46,15 @@ case "${1:-help}" in
     "${compose[@]}" up -d --no-deps --wait test-frontend
     node tests/daily-browser.cjs
     ;;
+  test-team)
+    "${compose[@]}" run --rm --no-deps tests bash /opt/hiru/scripts/test-site.sh browser
+    "${compose[@]}" up -d --no-deps --wait test-frontend
+    mkdir -p .local
+    "${compose[@]}" exec -T backend bench --site hiru-test.localhost execute hiru_construction.tests.daily_browser.prepare_team > .local/team-fixture.json
+    node tests/team-browser.cjs
+    ;;
   stop) "${compose[@]}" stop ;;
   status) "${compose[@]}" ps ;;
   logs) "${compose[@]}" logs --tail=100 "${2:-backend}" ;;
-  *) echo 'Use make start, stop, sleep, status, seed, verify, test, or test-ui.' ;;
+  *) echo 'Use make start, stop, sleep, status, seed, verify, test, test-ui, or test-team.' ;;
 esac

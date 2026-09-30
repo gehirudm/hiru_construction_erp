@@ -7,6 +7,8 @@ DEFAULT_CATEGORIES = (
 
 
 def after_install():
+    from hiru_construction.site_access import setup as site_access_setup
+    site_access_setup()
     from hiru_construction.quick_expense_fields import execute
     execute()
     for label in DEFAULT_CATEGORIES:

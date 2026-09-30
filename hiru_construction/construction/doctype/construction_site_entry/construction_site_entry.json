@@ -1,0 +1,154 @@
+{
+  "doctype": "DocType",
+  "name": "Construction Site Entry",
+  "module": "Construction",
+  "autoname": "hash",
+  "track_changes": 1,
+  "fields": [
+    {
+      "fieldname": "wallet",
+      "fieldtype": "Link",
+      "label": "Wallet",
+      "options": "Construction Site Wallet",
+      "reqd": 1
+    },
+    {
+      "fieldname": "kind",
+      "fieldtype": "Select",
+      "label": "Kind",
+      "options": "Expense\nAttendance\nFunding\nReturn",
+      "reqd": 1
+    },
+    {
+      "fieldname": "entry_date",
+      "fieldtype": "Date",
+      "label": "Entry Date",
+      "reqd": 1
+    },
+    {
+      "fieldname": "amount",
+      "fieldtype": "Currency",
+      "label": "Amount",
+      "reqd": 0
+    },
+    {
+      "fieldname": "description",
+      "fieldtype": "Small Text",
+      "label": "Description",
+      "reqd": 0
+    },
+    {
+      "fieldname": "payload",
+      "fieldtype": "Code",
+      "label": "Payload",
+      "options": "JSON",
+      "reqd": 1
+    },
+    {
+      "fieldname": "request_key",
+      "fieldtype": "Data",
+      "label": "Request Key",
+      "reqd": 1,
+      "unique": 1
+    },
+    {
+      "fieldname": "request_hash",
+      "fieldtype": "Data",
+      "label": "Request Hash",
+      "reqd": 1
+    },
+    {
+      "fieldname": "revision_of",
+      "fieldtype": "Link",
+      "label": "Revision Of",
+      "options": "Construction Site Entry",
+      "reqd": 0
+    },
+    {
+      "fieldname": "state",
+      "fieldtype": "Select",
+      "label": "State",
+      "options": "Pending\nApproved\nRejected\nSuperseded",
+      "reqd": 1
+    },
+    {
+      "fieldname": "voucher_type",
+      "fieldtype": "Link",
+      "label": "Voucher Type",
+      "options": "DocType",
+      "reqd": 0
+    },
+    {
+      "fieldname": "voucher",
+      "fieldtype": "Dynamic Link",
+      "label": "Voucher",
+      "options": "voucher_type",
+      "reqd": 0
+    },
+    {
+      "fieldname": "reviewed_by",
+      "fieldtype": "Link",
+      "label": "Reviewed By",
+      "options": "User",
+      "reqd": 0
+    },
+    {
+      "fieldname": "reviewed_on",
+      "fieldtype": "Datetime",
+      "label": "Reviewed On",
+      "reqd": 0
+    },
+    {
+      "fieldname": "review_reason",
+      "fieldtype": "Small Text",
+      "label": "Review Reason",
+      "reqd": 0
+    },
+    {
+      "fieldname": "correction_state",
+      "fieldtype": "Select",
+      "label": "Correction State",
+      "options": "\nRequested\nGranted\nUsed",
+      "reqd": 0
+    },
+    {
+      "fieldname": "correction_reason",
+      "fieldtype": "Small Text",
+      "label": "Correction Reason",
+      "reqd": 0
+    },
+    {
+      "fieldname": "granted_by",
+      "fieldtype": "Link",
+      "label": "Granted By",
+      "options": "User",
+      "reqd": 0
+    },
+    {
+      "fieldname": "granted_on",
+      "fieldtype": "Datetime",
+      "label": "Granted On",
+      "reqd": 0
+    },
+    {
+      "fieldname": "replacement",
+      "fieldtype": "Link",
+      "label": "Replacement",
+      "options": "Construction Site Entry",
+      "reqd": 0
+    }
+  ],
+  "permissions": [
+    {
+      "role": "System Manager",
+      "read": 1,
+      "report": 1
+    },
+    {
+      "role": "Construction Supervisor",
+      "read": 1
+    }
+  ],
+  "sort_field": "creation",
+  "sort_order": "DESC"
+}

@@ -10,6 +10,8 @@ from frappe.utils import escape_html, flt, getdate, nowdate, strip_html
 
 
 def home_page(user):
+    if user != "Guest" and "Construction Supervisor" in frappe.get_roles(user) and "System Manager" not in frappe.get_roles(user):
+        return "site-work"
     if user != "Guest" and set(frappe.get_roles(user)) & {"System Manager", "Projects Manager"}:
         return "construction"
 

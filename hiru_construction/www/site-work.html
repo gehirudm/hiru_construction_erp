@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token | e }}">
+  <title>Site team & money · Hiru Construction</title>
+  <link rel="stylesheet" href="/assets/hiru_construction/css/daily.css?v=team-1">
+  <link rel="stylesheet" href="/assets/hiru_construction/css/site-work.css?v=team-1">
+  <link rel="stylesheet" href="/assets/hiru_construction/css/site-team.css?v=team-1">
+  <script defer src="/assets/hiru_construction/js/site-team.js?v=team-1"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to site work</a>
+  <header class="topbar"><a class="brand" href="/site-work"><span class="brand-mark">H</span><span>Hiru Construction<small>Site team & money</small></span></a>
+    <nav aria-label="Account"><span>{{ display_name | e }}</span>{% if is_owner %}<a href="/construction">Project overview</a>{% endif %}<button id="sign-out" class="text-button">Sign out</button></nav>
+  </header>
+  <main class="shell" id="main">
+    <section class="intro"><div><p class="eyebrow">YOUR SITE WORK</p><h1>{% if is_owner %}Your team. Every rupee accounted for.{% else %}Attendance, spending and site money.{% endif %}</h1>
+      <p class="muted">Submissions lock when saved. Corrections need the owner's permission.</p></div></section>
+    <p id="message" role="status" hidden></p>
+    <section class="panel"><label for="wallet">Project and supervisor</label><select id="wallet"></select></section>
+    <div id="balances" class="team-balances"></div>
+    <nav class="work-tabs" aria-label="Site views">
+      <button data-tab="history">History & review</button><button data-tab="expense">Add expense</button><button data-tab="attendance">Mark attendance & OT</button>
+      {% if is_owner %}<button data-tab="money">Give / return money</button><button data-tab="access">People & access</button>{% endif %}
+    </nav>
+    <section class="panel" id="team-content" aria-live="polite"><p>Loading…</p></section>
+  </main>
+  <dialog id="action-dialog"><form id="action-form"><h2 id="action-title"></h2><label>Reason<textarea id="action-reason" required maxlength="500"></textarea></label><div class="actions"><button type="button" id="action-cancel" class="secondary">Cancel</button><button class="primary" type="submit">Confirm</button></div></form></dialog>
+</body>
+</html>

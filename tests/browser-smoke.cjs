@@ -71,6 +71,10 @@ async function main() {
     await page.getByRole('button', { name: 'Expense categories', exact: true }).click();
     await page.waitForFunction(() => document.querySelectorAll('.category-card').length === 5);
     await page.screenshot({ path: '.local/screenshots/categories-demo.png', fullPage: true });
+    await page.getByRole('link', { name: 'Site team & money', exact: true }).click();
+    await page.getByRole('button', { name: 'People & access', exact: true }).click();
+    await page.getByRole('heading', { name: 'Create a login', exact: true }).waitFor();
+    await page.screenshot({ path: '.local/screenshots/team-setup-demo.png', fullPage: true });
     await page.goto(base + '/desk/hiru-construction');
     await page.getByText('Construction Cost Category', { exact: true }).first().waitFor();
     fs.mkdirSync('.local/screenshots', { recursive: true });

@@ -16,7 +16,7 @@
   <a class="skip" href="#main">Skip to daily work</a>
   <header class="topbar">
     <a class="brand" href="/construction"><span class="brand-mark">H</span><span>Hiru Construction<small>Daily work</small></span></a>
-    <nav aria-label="Account"><span class="user-name">{{ display_name | e }}</span><a class="quiet-link" href="/desk/hiru-construction">Advanced workspace ↗</a><button class="text-button" id="logout">Sign out</button></nav>
+    <nav aria-label="Account"><span class="user-name">{{ display_name | e }}</span>{% if is_owner %}<a class="quiet-link" href="/site-work">Site team & money</a>{% endif %}<a class="quiet-link" href="/desk/hiru-construction">Advanced workspace ↗</a><button class="text-button" id="logout">Sign out</button></nav>
   </header>
   <main id="main" class="shell">
     <section class="intro"><div><p class="eyebrow">YOUR SITE, AT A GLANCE</p><h1>Let’s get to work.</h1><p class="muted">Choose a project to see its costs and record today’s expenses.</p></div><div class="date-chip" id="today"></div></section>

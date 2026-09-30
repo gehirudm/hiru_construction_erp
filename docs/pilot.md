@@ -45,12 +45,12 @@ The verification script reads submitted documents, stock balances, and the Gener
 
 ## Boundaries of this milestone
 
-- The **Hiru Construction** workspace and **Construction Cost Category** form are installed from versioned app files. Nine default global categories can be reused; additional categories can be global or restricted to a project. System Managers and Projects Managers can maintain categories; Projects Users can read them. This is the first category-management slice, not the final owner/supervisor role model.
+- The **Hiru Construction** workspace and **Construction Cost Category** form are installed from versioned app files. Ten default global categories can be reused; additional categories can be global or restricted to a project. System Managers and Projects Managers can maintain categories; Projects Users can read them. Portal supervisors see only category choices for assigned projects.
 - **Construction Cost Plan** records the original tender, approved revisions and contingency, with required project-company expense accounts and category mapping. **Construction Project Costs** provides the current budget/expense/order chart and report. The sample tender is `PILOT-TENDER-001`. See the [cost reporting guide](cost-reporting.md) for calculation boundaries and receipt-reconciliation handling.
 - Gantt tasks have dates and dependencies. Crew-based duration calculation and reviewed natural-language entry are not implemented yet.
 - The payroll examples exercise fixed daily, weekly, and monthly pay. Attendance-based amounts, wage-advance instalments, and statutory payroll rules still need dedicated implementation and checks.
 - Vehicle fuel claims and stock issues use standard records. Machinery engine hours, fuel efficiency dashboards, tools, and detailed subcontract tracking remain future work.
-- The pilot uses Administrator. The owner/supervisor permission model is not yet configured, and no external user invitations are sent.
+- Administrator is the initial owner. Create separate Owner/Supervisor logins and project assignments through `/site-work`; see [Site team and money](site-team.md). No external user invitations are sent. `make test-team` runs the multi-user browser workflow against the isolated test site.
 
 ## Versions and references
 

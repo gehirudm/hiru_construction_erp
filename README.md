@@ -16,7 +16,9 @@ The simplified [Daily work screen](http://localhost:8080/construction) includes 
 
 Use **Hiru Construction → Construction Project Costs** for the category chart and tender/budget/expense/order comparison. [Cost reporting guide](docs/cost-reporting.md) explains approval, revisions, and calculation boundaries. `make test` runs automated checks on a separate test site; it never runs them against the demo company.
 
-This is a development environment. Live deployment, backups, supervisor permissions, and statutory payroll configuration remain future work.
+This is a development environment. Live deployment, backups, business acceptance of supervisor permissions, and statutory payroll configuration remain future work.
+
+The [Site team & money screen](http://localhost:8080/site-work) now supports separate owner/supervisor logins, project assignments, locked attendance/expense submissions, owner approvals and one-time corrections. Track supervisor funding, spending, returns and negative balances without counting funding as a project expense. See the [site team guide](docs/site-team.md). Run `make test-team` for the isolated multi-user browser workflow.
 
 ## Working agreement
 

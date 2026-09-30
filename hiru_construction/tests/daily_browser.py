@@ -2,6 +2,32 @@
 import frappe
 
 
+def prepare_team():
+    if not frappe.conf.get("hiru_test"):
+        raise RuntimeError("Team fixtures require the isolated test site")
+    from uuid import uuid4
+    from frappe.utils import add_days, nowdate
+    suffix = str(uuid4())[:8]
+    company = frappe.get_doc("Company", "Cost Controls Test")
+    project = frappe.get_doc({"doctype": "Project", "project_name": "Team UI " + suffix,
+        "company": company.name, "cost_center": company.cost_center}).insert()
+    category = frappe.db.get_value("Construction Cost Category", {"category_name": "Transport", "scope": "Global"}, "name")
+    frappe.get_doc({"doctype": "Construction Cost Plan", "plan_name": "Team UI " + suffix,
+        "project": project.name, "version_kind": "Tender baseline", "items": [{"category": category,
+            "account": company.default_expense_account, "original_estimate": 10000}]}).insert().submit()
+    worker = frappe.get_doc({"doctype": "Employee", "first_name": "Team UI worker " + suffix,
+        "gender": "Male", "date_of_birth": "1990-01-01", "date_of_joining": add_days(nowdate(), -30),
+        "company": company.name, "status": "Active", "custom_construction_project": project.name}).insert()
+    supplier = frappe.get_doc({"doctype": "Supplier", "supplier_name": "Team UI supplier " + suffix,
+        "supplier_group": "All Supplier Groups", "supplier_type": "Company"}).insert()
+    custody = frappe.get_all("Construction Site Wallet", pluck="account", limit_page_length=0)
+    cash = frappe.get_all("Account", filters={"company": company.name, "account_type": "Cash", "is_group": 0,
+        "name": ["not in", custody or [""]]}, pluck="name")[0]
+    frappe.db.commit()
+    return {"project": project.name, "project_name": project.project_name, "worker": worker.name,
+        "supplier": supplier.name, "category": category, "cash": cash}
+
+
 def prepare():
     if not frappe.conf.get("hiru_test"):
         raise RuntimeError("Browser fixtures require the isolated test site")

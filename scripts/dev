@@ -31,9 +31,9 @@ case "$action" in
       colima stop hiru-erp
     fi
     ;;
-  start|init|seed|verify|status|logs|test|test-ui)
+  start|init|seed|verify|status|logs|test|test-ui|test-team)
     export HIRU_DOCKER_CONTEXT="$context"
     exec ./scripts/runtime "$@"
     ;;
-  *) echo 'Usage: make {start|stop|sleep|status|logs|seed|verify|test|test-ui}' ;;
+  *) echo 'Usage: make {start|stop|sleep|status|logs|seed|verify|test|test-ui|test-team}' ;;
 esac
