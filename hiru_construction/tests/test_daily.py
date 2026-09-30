@@ -2,7 +2,7 @@ from uuid import uuid4
 
 import frappe
 from frappe.tests import IntegrationTestCase
-from frappe.utils import nowdate
+from frappe.utils import nowdate, add_days
 
 from hiru_construction.daily import overview, save_expense, post_expense, expense
 
@@ -65,6 +65,45 @@ class TestDailyWork(IntegrationTestCase):
         with self.assertRaises(frappe.ValidationError):
             save_expense(payload)
 
+    def test_expense_list_reconciles_and_filters_posted_costs(self):
+        from hiru_construction.expenses import listing
+        for amount, description, date in (("100.25", "Delivery yesterday", add_days(nowdate(), -1)),
+                                          ("200.50", "Concrete delivery", nowdate())):
+            draft = save_expense(self.payload(amount=amount, description=description, date=date))
+            post_expense(draft["name"], draft["modified"])
+        save_expense(self.payload(amount="900"))
+        canceled = save_expense(self.payload(amount="800"))
+        post_expense(canceled["name"], canceled["modified"])
+        frappe.get_doc("Purchase Invoice", canceled["name"]).cancel()
+        data = listing(self.project.name)
+        self.assertEqual(data["total"], overview(self.project.name)["spent"])
+        self.assertEqual([r["running_total"] for r in data["rows"]], [100.25, 300.75])
+        for filters in ({"from_date": nowdate()}, {"search": "concrete"}, {"minimum": 150}):
+            selected = listing(self.project.name, filters)
+            self.assertEqual(selected["total"], 200.50)
+            self.assertEqual(selected["rows"][0]["running_total"], 200.50)
+        self.assertEqual(listing(self.project.name, {"category": self.category})["total"], 300.75)
+        self.assertEqual(listing(self.project.name, {"source": "Journal Entry"})["count"], 0)
+        self.assertEqual(listing(self.project.name, {"category": "__unmapped__"})["count"], 0)
+        self.assertEqual(listing(self.project.name, {"search": "Daily Supplier"})["count"], 2)
+        for filters in ({"minimum": "NaN"}, {"minimum": 10, "maximum": 1},
+                        {"from_date": nowdate(), "to_date": add_days(nowdate(), -1)}):
+            with self.assertRaises(frappe.ValidationError):
+                listing(self.project.name, filters)
+
+    def test_expense_list_pagination_keeps_running_total(self):
+        from hiru_construction.expenses import listing
+        for _ in range(26):
+            draft = save_expense(self.payload(amount="1.25"))
+            post_expense(draft["name"], draft["modified"])
+        first, second = listing(self.project.name, page_size=25), listing(self.project.name, page=2, page_size=25)
+        self.assertEqual(first["count"], 26)
+        self.assertEqual(first["total"], 32.5)
+        self.assertTrue(first["has_more"])
+        self.assertEqual(second["opening_total"], 31.25)
+        self.assertEqual(second["rows"][0]["running_total"], 32.5)
+        self.assertFalse(second["has_more"])
+
     def test_stale_review_cannot_post_changed_draft(self):
         draft = save_expense(self.payload())
         invoice = frappe.get_doc("Purchase Invoice", draft["name"])
@@ -83,10 +122,11 @@ class TestDailyWork(IntegrationTestCase):
             save_expense(self.payload(paid_from=self.company.default_expense_account))
 
     def test_guest_cannot_read_or_write(self):
+        from hiru_construction.expenses import listing
         draft = save_expense(self.payload())
         frappe.set_user("Guest")
         try:
-            for action in (lambda: overview(self.project.name), lambda: expense(draft["name"]),
+            for action in (lambda: listing(self.project.name), lambda: overview(self.project.name), lambda: expense(draft["name"]),
                            lambda: post_expense(draft["name"], draft["modified"]), lambda: save_expense(self.payload())):
                 with self.assertRaises(frappe.PermissionError):
                     action()
@@ -94,6 +134,7 @@ class TestDailyWork(IntegrationTestCase):
             frappe.set_user("Administrator")
 
     def test_project_manager_without_accounting_permissions_cannot_create(self):
+        from hiru_construction.expenses import listing
         user = frappe.get_doc({"doctype": "User", "email": "daily-manager@example.test",
             "first_name": "Daily Manager", "send_welcome_email": 0,
             "roles": [{"role": "Projects Manager"}]}).insert()
@@ -101,5 +142,7 @@ class TestDailyWork(IntegrationTestCase):
         try:
             with self.assertRaises(frappe.PermissionError):
                 save_expense(self.payload())
+            with self.assertRaises(frappe.PermissionError):
+                listing(self.project.name)
         finally:
             frappe.set_user("Administrator")

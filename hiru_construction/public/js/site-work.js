@@ -35,6 +35,7 @@
         if (token !== generation) return;
         sheet = { ...data, project: state.project }; renderCrew();
       } else if (view === 'categories') renderCategories();
+      else if (view === 'expenses') { await window.hiruExpenses.render(panel, () => token === generation); }
       else if (view === 'meals') { await window.hiruMeals.render(panel, () => token === generation); }
       else {
         const records = await fuel('history', { project: state.project });

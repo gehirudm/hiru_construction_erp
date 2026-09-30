@@ -1,5 +1,7 @@
 # Application architecture
 
+`expenses.py` exposes a read-only project expense listing backed by permission-filtered GL Entry records. Expense accounts and current approved cost-plan mappings define costs and categories. Decimal aggregation groups document/category rows, then applies filters and computes cumulative sums before pagination, without silently truncating history. Purchase Invoice metadata also respects document permissions. `public/js/expenses.js` renders the daily All expenses tab. This in-memory aggregation fits the initial project scale; larger histories will require database aggregation and performance validation.
+
 Meal controls use `Construction Meal` (unique project/date/type, headcount and rate snapshots) and the `Construction Meal Rate` Project child table. Purchase Invoices link to a meal; meal totals are read from posted invoices, not a second ledger. Hooks validate the linked project/date/category and recompute over-limit alert state after posting, cancellation or headcount changes. A dedicated Notification Type is excluded from email delivery. Standard document permissions, versioning and a database unique meal key remain in effect.
 
 The daily interface uses Frappe website routes in `hiru_construction/www/`, versioned assets in `public/`, and permission-checked methods in `daily.py`. Guided expenses create standard Purchase Invoices; custom fields store a unique retry identifier, request hash and category. No separate expense ledger is introduced. The optional test frontend serves only the isolated test site for `make test-ui`.

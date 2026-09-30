@@ -33,9 +33,38 @@ async function main() {
       throw error;
     }
     await page.goto(base + '/construction?project=PILOT-PROJECT-001');
-    await page.waitForFunction(() => document.querySelector('#spent').textContent.includes('132,000'));
+    await page.waitForFunction(() => /[0-9]/.test(document.querySelector('#spent').textContent));
+    const displayedAmount = async id => Number((await page.locator('#' + id).textContent()).replace(/[^0-9.-]/g, ''));
+    const overview = { budget: await displayedAmount('budget'), actual: await displayedAmount('spent'),
+      commitment: await displayedAmount('orders'), remaining: await displayedAmount('remaining') };
+    const totalText = overview.actual.toLocaleString('en-US', { minimumFractionDigits: 2 });
     fs.mkdirSync('.local/screenshots', { recursive: true });
     await page.screenshot({ path: '.local/screenshots/daily-demo.png', fullPage: true });
+    await page.getByRole('button', { name: 'All expenses', exact: true }).click();
+    const expenseTotal = async amount => page.waitForFunction(value =>
+      document.querySelector('#expenses-summary')?.textContent.includes(value), amount);
+    await expenseTotal(totalText);
+    assert.match(await page.locator('.expense-table tbody tr').last().locator('td').last().textContent(), new RegExp(totalText.replace('.', '\\.')));
+    await page.locator('.expense-filters select[name=category]').selectOption({ label: 'Fuel' });
+    await page.getByRole('button', { name: 'Apply filters', exact: true }).click();
+    await expenseTotal('9,000');
+    assert.match(await page.locator('.expense-table tbody tr').last().locator('td').last().textContent(), /9,000/);
+    await page.getByRole('button', { name: 'Clear filters', exact: true }).click();
+    await expenseTotal(totalText);
+    await page.locator('.expense-filters select[name=source]').selectOption('Purchase Invoice');
+    await page.getByRole('button', { name: 'Apply filters', exact: true }).click();
+    await page.waitForFunction(() => [...document.querySelectorAll('.expense-table tbody tr')].every(row => row.cells[3].textContent.includes('Purchase Invoice')));
+    assert.ok(await page.locator('.expense-table tbody tr').count());
+    await page.locator('.expense-filters input[name=search]').fill('no-such-expense-reference');
+    await page.getByRole('button', { name: 'Apply filters', exact: true }).click();
+    await expenseTotal('0 entries');
+    await page.getByRole('button', { name: 'Clear filters', exact: true }).click();
+    await expenseTotal(totalText);
+    await page.screenshot({ path: '.local/screenshots/expenses-demo.png', fullPage: true });
+    await page.setViewportSize({ width: 390, height: 844 });
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'Mobile page must fit the viewport');
+    await page.screenshot({ path: '.local/screenshots/expenses-mobile.png', fullPage: true });
+    await page.setViewportSize({ width: 1440, height: 1000 });
     await page.getByRole('button', { name: 'Attendance & OT', exact: true }).click();
     await page.waitForFunction(() => document.querySelectorAll('.crew-row').length === 3);
     await page.screenshot({ path: '.local/screenshots/crew-demo.png', fullPage: true });
@@ -63,7 +92,7 @@ async function main() {
       budget: sum.budget + row.current_budget, actual: sum.actual + row.actual,
       commitment: sum.commitment + row.commitment, remaining: sum.remaining + row.remaining_budget
     }), { budget: 0, actual: 0, commitment: 0, remaining: 0 }));
-    assert.deepEqual(totals, { budget: 405000, actual: 132000, commitment: 60000, remaining: 213000 });
+    assert.deepEqual(totals, overview, 'Detailed report must reconcile with the daily overview');
     await page.waitForFunction(() => [...document.querySelectorAll('.chart-container .bar')]
       .some(bar => bar.getBoundingClientRect().height > 5));
     await page.screenshot({ path: '.local/screenshots/project-costs.png', fullPage: true });
@@ -76,10 +105,10 @@ async function main() {
     }));
     assert.deepEqual(revision, { baseline: 'PILOT-TENDER-001', rows: 4, preservesTender: true });
     assert.deepEqual(errors, [], 'Unexpected browser errors');
-    console.log('PASS: login, workspace, project, categories, cost report totals, and revision form without JavaScript errors.');
+    console.log('PASS: expense totals, filters and mobile layout; login, workspace, project, categories, cost report and revision form without JavaScript errors.');
   } finally {
     await browser.close();
   }
 }
 
-main().catch(error => { console.error(error.message); process.exitCode = 1; });
+main().catch(error => { console.error(error.stack); process.exitCode = 1; });

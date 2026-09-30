@@ -1,6 +1,6 @@
-# Construction ERP requirements — pilot baseline 0.3
+# Construction ERP requirements — pilot baseline 0.4
 
-**Status:** Updated with meals requirements, 2026-09-28. Business rules and payroll compliance still need validation before live use.
+**Status:** Updated with expense history requirements, 2026-09-30. Business rules and payroll compliance still need validation before live use.
 
 ## Purpose and scope
 
@@ -35,6 +35,8 @@ The expected initial scale is 1–2 active projects, 10–20 workers, 4–6 vehi
 | R12 | Include Meals in project budgets and expense categories. Track spending per meal and per person, compare with an expected cost per person, and notify the owner when it is exceeded. Suggest each day's headcount from project attendance and allow a manual adjustment for people who did not eat. | Meal expenses contribute once to project costs and the Meals category. A meal view shows attendance headcount, adjusted diners, total cost, actual cost per diner and expected cost. Multiple bills for the same meal are combined without counting diners twice. Over-limit meals are clearly flagged; missing attendance or a zero headcount never produces a misleading per-person figure. |
 
 ## Pilot defaults and calculations
+
+**R13 — Expense history:** List all posted costs for the selected project, with a cumulative sum and a filtered total. Support category, date range, transaction source, description/supplier/reference search and minimum/maximum amount. Acceptance: totals reconcile with accessible expense ledger postings; credits reduce spending; running totals restart with filters and continue across pages. Drafts remain outside posted totals.
 
 - **Starting cost categories:** Materials, Labour, Subcontractors, Machinery and equipment, Fuel, Meals, Transport, Site overhead, Permits and fees, and Other. These are editable global defaults. A project may add categories of its own. Contingency is a budget reserve, not an actual expense category.
 - **Budget versions:** Preserve the submitted tender as the original baseline. Show an approved revised budget separately and use it as the current budget if one exists. The owner approves revisions; the pilot does not silently rewrite the tender.
@@ -85,6 +87,7 @@ This is a capability map, not a final implementation choice. We will test standa
 8. **Planning:** Add capacity-aware scheduling and reviewed natural-language work-item entry.
 9. **Meals budget and cost-per-head controls — delivered for review:** Meals category and budget integration; confirmed-attendance suggested diners, manually adjustable headcounts with reasons, expected costs per person, combined meal bills and in-app over-limit alerts. Historical attendance/rate snapshots and diner corrections are preserved. Current defaults use breakfast/lunch/dinner limits per project; the owner can review these defaults.
 10. **Simplified payroll and wage advances:** Owner-facing daily/weekly/monthly pay runs, OT rate configuration, wage advances and next-pay/instalment deductions, using the standard HRMS payroll records.
+11. **Expense history — delivered for review:** All expenses view with category/date/source/search/amount filters, document links, filtered totals and cumulative amounts across pages. Uses posted project expense accounts, including costs entered through other ERPNext workflows.
 
 Each completed milestone gets a separate local, Git-ignored numbered devlog and a Git commit for the corresponding repository changes. Future milestone scope and order may change after the pilot.
 
