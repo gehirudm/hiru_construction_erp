@@ -4,7 +4,15 @@ Open [Site team & money](http://localhost:8080/site-work) from the daily screen.
 
 ## Set up people
 
-In **People & access**, create an Owner login for your father and a Supervisor login for each supervisor. Owner accounts receive administration, accounts, purchasing, stock, project, HR and payroll roles. Supervisors use a restricted website account; they do not receive standard accounting, HR or project-manager roles. Set an initial password of at least 12 characters and share it privately. This action sends no email.
+All projects appear in the owner's **Project / site** selector, including sites without supervisors. Choose a site and select **Add supervisor** (also available in **People & access**).
+
+1. Confirm the site and choose **New supervisor** or **Existing supervisor**.
+2. For someone new, enter their name, email/login and an initial password of at least 12 characters. For an existing supervisor, select their login.
+3. Select **Give site access**. A new login and its site assignment are created together. The screen selects the supervisor and shows that access is ready; you can then record money given to them.
+
+Share new login details privately; no email is sent. Existing passwords are unchanged. Reusing an assignment preserves its cash account and history; giving access again restores a disabled assignment. Closed projects remain visible for history and settlement, but new access is granted only to open projects.
+
+To create your father's separate Owner login, expand **Add another owner login** in People & access. Owner accounts receive administration, accounts, purchasing, stock, project, HR and payroll roles. Supervisors use a restricted website account; they do not receive standard accounting, HR or project-manager roles.
 
 Assign each supervisor to the projects they can work on. Every project/supervisor pair has a separate cash account and balance. Existing assignments are reused. Disable an assignment to revoke access to that project's screen, history and APIs; the owner retains the audit history. To disable the entire login or reset its password, use the owner's standard User administration screen. Do not grant supervisors additional ERPNext roles: those roles can independently grant broader access.
 

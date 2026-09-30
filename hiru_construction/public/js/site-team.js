@@ -35,22 +35,38 @@
     const b = el('button', text, cls); b.type = 'button'; b.addEventListener('click', action); return b;
   }
   function form(title) { panel.append(el('h2', title)); const f = el('form', undefined, 'team-form'); panel.append(f); return f; }
+  function lockSelection(locked) {
+    if ($('site-project')) $('site-project').disabled = locked;
+    if ($('add-supervisor')) $('add-supervisor').disabled = locked || !$('site-project').value;
+    $('wallet').disabled = locked || !$('wallet').options.length || $('wallet').options.length === 1;
+  }
   function submit(form, text, action) {
     const b = el('button', text, 'primary'); b.type = 'submit'; form.append(b);
     form.addEventListener('submit', async event => {
       event.preventDefault(); if (busy) return;
-      busy = true; b.disabled = true; $('wallet').disabled = true;
+      busy = true; b.disabled = true; lockSelection(true);
       try { await action(); } catch (error) { message(error.message, true); }
-      finally { busy = false; b.disabled = false; $('wallet').disabled = false; }
+      finally { busy = false; b.disabled = false; lockSelection(false); }
     });
   }
   async function load(preferred) {
-    const token = ++generation; boot = await api('bootstrap');
+    const token = ++generation, result = await api('bootstrap');
     if (token !== generation) return;
+    boot = result;
     const selected = preferred || $('wallet').value;
-    options($('wallet'), boot.wallets.map(w => [w.name, `${w.project_name} · ${w.supervisor_name}${w.enabled ? '' : ' (disabled)'}`]), 'Choose a site');
-    $('wallet').value = boot.wallets.some(w => w.name === selected) ? selected : boot.wallets[0]?.name || '';
+    if (boot.owner) {
+      const project = boot.wallets.find(w => w.name === selected)?.project || $('site-project').value;
+      options($('site-project'), boot.projects.map(p => [p.name, p.project_name + (p.status === 'Open' ? '' : ` (${p.status})`)]), 'Choose a project');
+      $('site-project').value = boot.projects.some(p => p.name === project) ? project : boot.projects.find(p => p.status === 'Open')?.name || boot.projects[0]?.name || '';
+    }
+    chooseWallet(selected);
     await refresh();
+  }
+  function chooseWallet(preferred) {
+    const wallets = boot.owner ? boot.wallets.filter(w => w.project === $('site-project').value) : boot.wallets;
+    options($('wallet'), wallets.map(w => [w.name, `${boot.owner ? '' : w.project_name + ' · '}${w.supervisor_name}${w.enabled ? '' : ' (disabled)'}`]), wallets.length ? 'Choose a supervisor' : 'No supervisors assigned yet');
+    $('wallet').value = wallets.some(w => w.name === preferred) ? preferred : wallets[0]?.name || '';
+    lockSelection(busy);
   }
   async function refresh() {
     const token = ++generation, wallet = $('wallet').value;
@@ -79,7 +95,19 @@
       }
     }
     if (tab === 'access' && boot.owner) return access();
-    if (!data) { panel.append(el('p', boot.owner ? 'Create a supervisor and assign a project in People & access.' : 'The owner has not assigned an active project yet.')); return; }
+    if (!data) {
+      if (boot.owner) {
+        const project = boot.projects.find(p => p.name === $('site-project').value);
+        panel.append(el('h2', project?.project_name || 'Your sites'));
+        if (project?.status === 'Open') {
+          const assigned = boot.wallets.some(w => w.project === project.name);
+          panel.append(el('p', assigned ? 'Choose a supervisor above to see their spending and site money, or add another supervisor.' : 'No supervisor has been assigned to this site yet. Add someone new or give an existing supervisor access.'));
+          panel.append(button('Add a supervisor to this site', openAccess, 'primary'));
+        } else panel.append(el('p', project ? 'This project is closed. Choose an open project to add a supervisor.' : 'Create a project first, then add a supervisor here.'));
+        const link = el('a', 'Open project setup'); link.href = '/desk/project'; const help = el('p'); help.append(link); panel.append(help);
+      } else panel.append(el('p', 'The owner has not assigned an active project yet.'));
+      return;
+    }
     if (!data.enabled) panel.append(el('p', 'This assignment is disabled. History remains available to the owner.', 'alert'));
     if (tab === 'expense') expenseForm();
     else if (tab === 'attendance') attendanceForm();
@@ -131,7 +159,7 @@
       });
     }; filter.addEventListener('change', draw); draw();
   }
-  async function run(action) { if (busy) return; busy = true; try { await action(); } catch (error) { message(error.message, true); } finally { busy = false; } }
+  async function run(action) { if (busy) return; busy = true; lockSelection(true); try { await action(); } catch (error) { message(error.message, true); } finally { busy = false; lockSelection(false); } }
   function explain(title, action) {
     $('action-title').textContent = title; $('action-reason').value = ''; $('action-dialog').showModal();
     $('action-form').onsubmit = async event => {
@@ -218,27 +246,53 @@
     });
   }
   function access() {
-    const f = form('Create a login');
-    f.append(el('p', 'Owner accounts have business and administration access. Supervisors only see assigned sites. Share the initial password privately; no email is sent.', 'muted wide'));
-    const name = field(f, 'full_name', 'Name'), email = field(f, 'email', 'Email / login', 'email');
-    const password = field(f, 'password', 'Initial password (12+ characters)', 'password'); password.minLength = 12; password.autocomplete = 'new-password';
-    const access = field(f, 'access', 'Access level', 'select'); options(access, [['Supervisor', 'Supervisor'], ['Owner', 'Owner — full access']]); access.value = 'Supervisor';
-    submit(f, 'Create login', async () => { await api('create_user', { email: email.value, full_name: name.value, password: password.value, access: access.value }, true); password.value = ''; await load(); message('Login created. Assign a supervisor to a project below.'); });
-    const assign = form('Assign a supervisor to a project');
-    const project = field(assign, 'project', 'Project', 'select'); options(project, boot.projects.map(p => [p.name, p.project_name]));
-    const supervisor = field(assign, 'supervisor', 'Supervisor', 'select'); options(supervisor, boot.supervisors.map(u => [u.name, u.full_name]));
-    submit(assign, 'Assign project', async () => { const result = await api('assign', { project: project.value, supervisor: supervisor.value }, true); await load(result.wallet); message('Project assigned with a separate site-money balance.'); });
-    panel.append(el('h2', 'Current assignments'));
-    boot.wallets.forEach(w => {
+    const f = form('Add a supervisor');
+    f.append(el('p', 'Choose the site and person below. They can submit attendance, OT and expenses; changes still need your permission.', 'access-note wide'));
+    const project = field(f, 'project', 'Give access to this site', 'select'); options(project, boot.projects.filter(p => p.status === 'Open').map(p => [p.name, p.project_name])); project.value = $('site-project').value;
+    const mode = field(f, 'mode', 'Who needs access?', 'select'); options(mode, [['new', 'New supervisor — create a login'], ['existing', 'Existing supervisor']]); mode.value = 'new';
+    const person = el('div', undefined, 'team-form wide'); f.append(person);
+    let name, email, password, supervisor;
+    const drawPerson = () => {
+      person.replaceChildren();
+      if (mode.value === 'new') {
+        name = field(person, 'full_name', 'Supervisor name'); name.maxLength = 140;
+        email = field(person, 'email', 'Email / login', 'email'); email.autocomplete = 'off';
+        password = field(person, 'password', 'Initial password (12+ characters)', 'password'); password.minLength = 12; password.autocomplete = 'new-password';
+        person.append(el('p', 'Share this login and password privately with the supervisor. No email is sent.', 'muted wide'));
+      } else {
+        supervisor = field(person, 'supervisor', 'Supervisor', 'select'); options(supervisor, boot.supervisors.map(u => [u.name, `${u.full_name} (${u.name})`]));
+        person.append(el('p', 'Their existing password stays the same. Giving access again restores a disabled assignment.', 'muted wide'));
+      }
+    }; mode.addEventListener('change', drawPerson); drawPerson();
+    submit(f, 'Give site access', async () => {
+      const args = mode.value === 'new' ? { email: email.value, full_name: name.value, password: password.value } : { supervisor: supervisor.value };
+      const result = await api('add_supervisor', { project: project.value, ...args }, true);
+      if (password) password.value = '';
+      tab = 'history'; await load(result.wallet);
+      message(`Access is ready for ${result.user}. They can sign in at ${location.origin}/site-work. You can now record money given to them.`);
+    });
+    panel.append(el('h2', 'Who has access to this site?'));
+    const assignments = boot.wallets.filter(w => w.project === $('site-project').value);
+    if (!assignments.length) panel.append(el('p', 'No supervisors assigned yet.', 'muted'));
+    assignments.forEach(w => {
       const row = el('div', undefined, 'work-toolbar'); row.append(el('span', `${w.project_name} · ${w.supervisor_name} · ${w.enabled ? 'Enabled' : 'Disabled'}`));
       row.append(button(w.enabled ? 'Disable access' : 'Enable access', () => run(async () => { await api('set_enabled', { wallet: w.name, enabled: w.enabled ? 0 : 1 }, true); await load(); message('Assignment updated.'); }))); panel.append(row);
     });
+    const owners = el('details', undefined, 'owner-login'); owners.append(el('summary', 'Add another owner login'));
+    const ownerForm = el('form', undefined, 'team-form'); owners.append(ownerForm); panel.append(owners);
+    ownerForm.append(el('p', 'Owners have full business and administration access.', 'muted wide'));
+    const ownerName = field(ownerForm, 'owner_name', 'Owner name'), ownerEmail = field(ownerForm, 'owner_email', 'Owner email / login', 'email');
+    const ownerPassword = field(ownerForm, 'owner_password', 'Owner initial password (12+ characters)', 'password'); ownerPassword.minLength = 12; ownerPassword.autocomplete = 'new-password';
+    submit(ownerForm, 'Create owner login', async () => { await api('create_user', { email: ownerEmail.value, full_name: ownerName.value, password: ownerPassword.value, access: 'Owner' }, true); ownerForm.reset(); message('Owner login created. Share the password privately.'); });
   }
+  function openAccess() { if (!busy && boot) { tab = 'access'; correction = null; render(); panel.scrollIntoView({ block: 'start', behavior: 'instant' }); } }
   document.querySelectorAll('[data-tab]').forEach(b => {
     b.disabled = true;
     b.addEventListener('click', () => { if (!busy && boot) { tab = b.dataset.tab; correction = null; render(); } });
   });
   $('wallet').addEventListener('change', () => { correction = null; refresh().catch(e => message(e.message, true)); });
+  if ($('site-project')) $('site-project').addEventListener('change', () => { correction = null; chooseWallet(); refresh().catch(e => message(e.message, true)); });
+  if ($('add-supervisor')) $('add-supervisor').addEventListener('click', openAccess);
   $('sign-out').onclick = () => run(async () => { await api('logout', {}, true); location.href = '/login'; });
   load().catch(error => message(error.message, true));
 })();

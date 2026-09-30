@@ -245,3 +245,30 @@ class TestSiteTeam(IntegrationTestCase):
         self.fund(125)
         self.assertEqual(team.details(self.wallet)["posted"], 0)
         self.assertEqual(overview(self.project.name)["spent"], 125)
+
+    def test_unassigned_sites_and_combined_supervisor_setup(self):
+        project = frappe.get_doc({"doctype": "Project", "project_name": "Unassigned " + str(uuid4()),
+            "company": self.company.name}).insert()
+        self.assertIn(project.name, [p.name for p in team.bootstrap()["projects"]])
+        email = f"combined-{uuid4()}@example.test"
+        result = team.add_supervisor(project.name, email=email, full_name="New Supervisor", password=str(uuid4()))
+        wallet = frappe.get_doc("Construction Site Wallet", result["wallet"])
+        self.assertEqual((wallet.project, wallet.supervisor, wallet.enabled), (project.name, email, 1))
+        self.assertFalse(frappe.has_permission("Purchase Invoice", "create", user=email))
+        team.set_enabled(wallet.name, 0)
+        self.assertEqual(team.add_supervisor(project.name, supervisor=email)["wallet"], wallet.name)
+        self.assertEqual(frappe.db.get_value(wallet.doctype, wallet.name, "enabled"), 1)
+        with self.assertRaises(frappe.ValidationError):
+            team.add_supervisor(project.name, email=email, full_name="Duplicate", password=str(uuid4()))
+        frappe.set_user(email)
+        with self.assertRaises(frappe.PermissionError):
+            team.add_supervisor(project.name, supervisor=self.user)
+        self.assertNotIn("projects", team.bootstrap())
+
+    def test_combined_setup_rejects_closed_site_before_creating_login(self):
+        self.project.status = "Completed"
+        self.project.save()
+        email = f"closed-site-{uuid4()}@example.test"
+        with self.assertRaises(frappe.ValidationError):
+            team.add_supervisor(self.project.name, email=email, full_name="No access", password=str(uuid4()))
+        self.assertFalse(frappe.db.exists("User", email))

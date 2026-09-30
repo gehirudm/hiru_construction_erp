@@ -104,6 +104,23 @@ def create_user(email, full_name, password, access="Supervisor"):
 
 
 @frappe.whitelist(methods=["POST"])
+def add_supervisor(project, supervisor=None, email=None, full_name=None, password=None):
+    """Create a restricted login and its assignment in the same request transaction."""
+    require_owner()
+    from hiru_construction.daily import checked_project
+    project = checked_project(project)
+    if project.status != "Open":
+        frappe.throw(_("Choose an open project when giving a supervisor access."))
+    if not supervisor:
+        if frappe.db.exists("User", str(email or "").strip().lower()):
+            frappe.throw(_("This login already exists. Choose Existing supervisor to give them access."))
+        supervisor = create_user(email, full_name, password, access="Supervisor")["user"]
+    result = assign(project.name, supervisor)
+    set_enabled(result["wallet"], 1)
+    return {**result, "user": supervisor}
+
+
+@frappe.whitelist(methods=["POST"])
 def assign(project, supervisor):
     require_owner()
     from hiru_construction.daily import checked_project
@@ -151,7 +168,8 @@ def bootstrap():
         row["supervisor_name"] = frappe.get_cached_value("User", row.supervisor, "full_name")
     data = {"owner": is_owner(), "today": nowdate(), "wallets": wallets}
     if is_owner():
-        data["projects"] = frappe.get_list("Project", filters={"status": "Open"}, fields=["name", "project_name"], limit_page_length=0)
+        data["projects"] = frappe.get_list("Project", fields=["name", "project_name", "status"],
+            order_by="project_name asc", limit_page_length=0)
         names = frappe.get_all("Has Role", filters={"role": "Construction Supervisor", "parenttype": "User"}, pluck="parent")
         data["supervisors"] = frappe.get_all("User", filters={"name": ["in", names], "enabled": 1},
             fields=["name", "full_name"], limit_page_length=0) if names else []

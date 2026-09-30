@@ -22,7 +22,7 @@ async function main() {
     await page.locator('.btn-login:not(.btn-login-with-email-link)').click();
     await page.waitForURL(url => !url.pathname.startsWith('/login'));
     await page.goto(base + '/site-work');
-    await page.waitForFunction(() => /History & review|not assigned|Create a supervisor/.test(document.querySelector('#team-content').textContent));
+    await page.waitForFunction(() => !document.querySelector('[data-tab=history]').disabled);
     return page;
   }
   async function waitCall(page, method, action) {
@@ -41,15 +41,26 @@ async function main() {
   }
   try {
     const owner = await login('Administrator', env.PILOT_ADMIN_PASSWORD);
-    await tab(owner, 'People & access');
+    await owner.locator('#site-project').selectOption(fixture.project);
+    await owner.getByText('No supervisor has been assigned to this site yet.', { exact: false }).waitFor();
+    await owner.getByRole('button', { name: 'Add a supervisor to this site', exact: true }).click();
+    assert.equal(await owner.locator('[name=project]').inputValue(), fixture.project);
+    await owner.setViewportSize({ width: 390, height: 844 });
+    await owner.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+    assert.ok(await owner.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'Owner onboarding must fit mobile');
+    fs.mkdirSync('.local/screenshots', { recursive: true });
+    await owner.screenshot({ path: '.local/screenshots/supervisor-onboarding-mobile.png', fullPage: true });
+    await owner.setViewportSize({ width: 1440, height: 1000 });
     const email = `team-ui-${randomUUID()}@example.test`, password = randomUUID();
     await owner.locator('[name=full_name]').fill('Site Supervisor UI');
     await owner.locator('[name=email]').fill(email); await owner.locator('[name=password]').fill(password);
-    await waitCall(owner, 'create_user', () => owner.getByRole('button', { name: 'Create login', exact: true }).click());
-    await owner.locator('[name=project]').selectOption(fixture.project);
-    await owner.locator('[name=supervisor]').selectOption(email);
-    const assigned = await waitCall(owner, 'assign', () => owner.getByRole('button', { name: 'Assign project', exact: true }).click());
+    const assigned = await waitCall(owner, 'add_supervisor', () => owner.getByRole('button', { name: 'Give site access', exact: true }).click());
     await owner.waitForFunction(wallet => document.querySelector('#wallet').value === wallet, assigned.wallet);
+    await owner.locator('#add-supervisor').click();
+    await owner.locator('[name=mode]').selectOption('existing');
+    await owner.locator('[name=supervisor]').selectOption(email);
+    const reused = await waitCall(owner, 'add_supervisor', () => owner.getByRole('button', { name: 'Give site access', exact: true }).click());
+    assert.equal(reused.wallet, assigned.wallet, 'Existing supervisor keeps the same wallet and login');
     await tab(owner, 'Give / return money');
     await owner.locator('[name=kind]').selectOption('Funding');
     await owner.locator('[name=amount]').fill('100'); await owner.locator('[name=account]').selectOption(fixture.cash);
@@ -76,17 +87,17 @@ async function main() {
       }); return response.status;
     }, entry.name);
     assert.equal(denied, 403, 'Supervisor must not bypass locked submissions using REST');
-    await owner.reload(); await owner.selectOption('#wallet', assigned.wallet);
+    await owner.reload(); await owner.selectOption('#site-project', fixture.project); await owner.selectOption('#wallet', assigned.wallet);
     await owner.locator(`[data-entry="${entry.name}"]`).waitFor();
     await actWithReason(owner, owner.locator(`[data-entry="${entry.name}"]`), 'Approve', 'Receipt checked', 'review');
     await supervisor.reload(); await row().getByText(/Approved/).first().waitFor();
     await actWithReason(supervisor, row(), 'Request correction', 'Receipt amount was 80', 'request_correction');
-    await owner.reload(); await owner.selectOption('#wallet', assigned.wallet);
+    await owner.reload(); await owner.selectOption('#site-project', fixture.project); await owner.selectOption('#wallet', assigned.wallet);
     await waitCall(owner, 'grant_correction', () => owner.locator(`[data-entry="${entry.name}"]`).getByRole('button', { name: 'Allow one correction' }).click());
     await supervisor.reload(); await row().getByRole('button', { name: 'Enter correction' }).click();
     await supervisor.locator('[name=amount]').fill('80');
     const corrected = await waitCall(supervisor, 'submit_entry', () => supervisor.getByRole('button', { name: 'Submit correction', exact: true }).click());
-    await owner.reload(); await owner.selectOption('#wallet', assigned.wallet);
+    await owner.reload(); await owner.selectOption('#site-project', fixture.project); await owner.selectOption('#wallet', assigned.wallet);
     await owner.locator(`[data-entry="${corrected.name}"]`).waitFor();
     await actWithReason(owner, owner.locator(`[data-entry="${corrected.name}"]`), 'Approve', 'Correction checked', 'review');
     await owner.waitForFunction(() => document.querySelector('#balances article strong').textContent.includes('20.00'));
@@ -94,7 +105,7 @@ async function main() {
     await supervisor.locator('.team-check input').check();
     await supervisor.locator('[name=ot]').fill('2');
     await waitCall(supervisor, 'submit_crew', () => supervisor.getByRole('button', { name: 'Submit selected attendance' }).click());
-    await owner.reload(); await owner.selectOption('#wallet', assigned.wallet);
+    await owner.reload(); await owner.selectOption('#site-project', fixture.project); await owner.selectOption('#wallet', assigned.wallet);
     const attendance = owner.locator('.team-record').filter({ has: owner.getByRole('heading', { name: /Attendance.*Pending/ }) });
     await actWithReason(owner, attendance, 'Approve', 'Attendance checked', 'review');
     fs.mkdirSync('.local/screenshots', { recursive: true });

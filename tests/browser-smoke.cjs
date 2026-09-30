@@ -73,7 +73,8 @@ async function main() {
     await page.screenshot({ path: '.local/screenshots/categories-demo.png', fullPage: true });
     await page.getByRole('link', { name: 'Site team & money', exact: true }).click();
     await page.getByRole('button', { name: 'People & access', exact: true }).click();
-    await page.getByRole('heading', { name: 'Create a login', exact: true }).waitFor();
+    await page.getByRole('heading', { name: 'Add a supervisor', exact: true }).waitFor();
+    assert.ok(await page.locator('#site-project option[value="PILOT-PROJECT-001"]').count(), 'Unassigned demo project must be visible');
     await page.screenshot({ path: '.local/screenshots/team-setup-demo.png', fullPage: true });
     await page.goto(base + '/desk/hiru-construction');
     await page.getByText('Construction Cost Category', { exact: true }).first().waitFor();

@@ -91,6 +91,7 @@ This is a capability map, not a final implementation choice. We will test standa
 10. **Simplified payroll and wage advances:** Owner-facing daily/weekly/monthly pay runs, OT rate configuration, wage advances and next-pay/instalment deductions, using the standard HRMS payroll records.
 11. **Expense history — delivered for review:** All expenses view with category/date/source/search/amount filters, document links, filtered totals and cumulative amounts across pages. Uses posted project expense accounts, including costs entered through other ERPNext workflows.
 12. **Owner/supervisor access and site money — delivered for review:** Separate logins and project assignments, restricted supervisor attendance/OT and expense submissions, immediate locking, owner review, one-use correction grants, project/supervisor cash balances, funding/returns/reimbursements, negative balances and auditable native accounting vouchers. Initial default: attendance and expenses require owner approval; negative reported balances are allowed.
+13. **Simpler supervisor setup — delivered for review:** Owners see all sites before any supervisor is assigned. A single Add supervisor flow creates a restricted login and grants site access, or reuses an existing supervisor and cash history. Empty states explain the next step; owner account creation is kept in a separate expandable section.
 
 Each completed milestone gets a separate local, Git-ignored numbered devlog and a Git commit for the corresponding repository changes. Future milestone scope and order may change after the pilot.
 
